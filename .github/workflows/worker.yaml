@@ -1,7 +1,7 @@
 name: bestofrs worker
 on:
   schedule:
-    - cron: "*/5 * * * *" # every 5 minutes (test)
+    - cron: "0 0 * * *" # UTC 00:00
   workflow_dispatch:
 
 jobs:
