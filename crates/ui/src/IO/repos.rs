@@ -3,10 +3,12 @@ use dioxus::prelude::*;
 use crate::types::repos::RepoDto;
 use crate::types::snapshot_deltas::SnapshotDeltaDto;
 use crate::types::snapshots::SnapshotDto;
+use crate::types::tags::TagDto;
 use crate::IO::api_error::api_error;
 use crate::IO::extractors::AppStateExt;
 
 use app::prelude::{Page, Pagination};
+use app::repo::{ReplaceRepoTagsCommand, TagInput};
 
 #[post("/api/repos", state: AppStateExt)]
 pub async fn list_repos(page: Pagination) -> ServerFnResult<Page<RepoDto>> {
@@ -15,7 +17,7 @@ pub async fn list_repos(page: Pagination) -> ServerFnResult<Page<RepoDto>> {
     let repos_page = app_state
         .repo
         .query
-        .list(page)
+        .list_with_tags(page)
         .await
         .map_err(api_error)?;
     Ok(repos_page.map(RepoDto::from))
@@ -27,10 +29,52 @@ pub async fn get_repo(owner: String, name: String) -> ServerFnResult<Option<Repo
     let repo = app_state
         .repo
         .query
-        .get_by_owner_name(&owner, &name)
+        .get_by_owner_name_with_tags(&owner, &name)
         .await
         .map_err(api_error)?;
     Ok(repo.map(RepoDto::from))
+}
+
+#[post("/api/repos/:owner/:name/tags/replace", state: AppStateExt)]
+pub async fn replace_repo_tags(
+    owner: String,
+    name: String,
+    tags: Vec<TagDto>,
+) -> ServerFnResult<()> {
+    let app_state = state.0;
+    let full_name = format!("{owner}/{name}");
+    app_state
+        .repo
+        .command
+        .replace_tags_by_repo_id(ReplaceRepoTagsCommand {
+            repo_id: full_name,
+            tags: tags
+                .into_iter()
+                .map(|tag| TagInput {
+                    label: tag.label,
+                    value: tag.value,
+                })
+                .collect(),
+        })
+        .await
+        .map_err(api_error)?;
+    Ok(())
+}
+
+#[post("/api/repos/by_label", state: AppStateExt)]
+pub async fn list_repos_by_label(
+    label: String,
+    value: Option<String>,
+    page: Pagination,
+) -> ServerFnResult<Page<RepoDto>> {
+    let app_state = state.0;
+    let repos_page = app_state
+        .repo
+        .query
+        .list_by_label_with_tags(&label, value.as_deref(), page)
+        .await
+        .map_err(api_error)?;
+    Ok(repos_page.map(RepoDto::from))
 }
 
 #[post("/api/repos/:owner/:name/snapshots", state: AppStateExt)]

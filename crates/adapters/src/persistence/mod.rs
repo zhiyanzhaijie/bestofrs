@@ -6,12 +6,13 @@ use std::sync::Arc;
 
 use app::app_error::{AppError, AppResult};
 use app::project::ProjectRepo;
-use app::repo::RepoRepo;
+use app::repo::{RepoRepo, RepoTagRepo};
 use app::snapshot::{SnapshotDeltaRepo, SnapshotRepo};
 
 pub struct DbRepos {
     pub project: Arc<dyn ProjectRepo>,
     pub repo: Arc<dyn RepoRepo>,
+    pub repo_tag: Arc<dyn RepoTagRepo>,
     pub snapshot: Arc<dyn SnapshotRepo>,
     pub snapshot_delta: Arc<dyn SnapshotDeltaRepo>,
 }
@@ -41,6 +42,7 @@ impl PersistenceAdapter for PostgresAdapter {
 
         let project: Arc<dyn ProjectRepo> = Arc::new(psql::PostgresProjectRepo::new(pool.clone()));
         let repo: Arc<dyn RepoRepo> = Arc::new(psql::PostgresRepoRepo::new(pool.clone()));
+        let repo_tag: Arc<dyn RepoTagRepo> = Arc::new(psql::PostgresRepoTagRepo::new(pool.clone()));
 
         let snapshot_repo = Arc::new(psql::PostgresSnapshotRepo::new(pool));
         let snapshot: Arc<dyn SnapshotRepo> = snapshot_repo.clone();
@@ -49,6 +51,7 @@ impl PersistenceAdapter for PostgresAdapter {
         Ok(DbRepos {
             project,
             repo,
+            repo_tag,
             snapshot,
             snapshot_delta,
         })
@@ -70,6 +73,7 @@ impl PersistenceAdapter for SqliteAdapter {
 
         let project: Arc<dyn ProjectRepo> = Arc::new(sqlite::SqliteProjectRepo::new(pool.clone()));
         let repo: Arc<dyn RepoRepo> = Arc::new(sqlite::SqliteRepoRepo::new(pool.clone()));
+        let repo_tag: Arc<dyn RepoTagRepo> = Arc::new(sqlite::SqliteRepoTagRepo::new(pool.clone()));
 
         let snapshot_repo = Arc::new(sqlite::SqliteSnapshotRepo::new(pool));
         let snapshot: Arc<dyn SnapshotRepo> = snapshot_repo.clone();
@@ -78,6 +82,7 @@ impl PersistenceAdapter for SqliteAdapter {
         Ok(DbRepos {
             project,
             repo,
+            repo_tag,
             snapshot,
             snapshot_delta,
         })

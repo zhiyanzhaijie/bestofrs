@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::RepoId;
+use super::{RepoId, Tag};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Repo {
@@ -13,4 +13,10 @@ pub struct Repo {
     pub watchers: i64,
     pub last_fetched_at: Option<String>,
     pub etag: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RepoWithTags {
+    pub repo: Repo,
+    pub tags: Vec<Tag>,
 }

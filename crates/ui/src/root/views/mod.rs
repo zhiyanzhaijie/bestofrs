@@ -1,5 +1,5 @@
 mod home;
-pub use home::Home;
+pub use home::{Home, RepoList};
 
 mod layout;
 pub use layout::Layout;
@@ -9,6 +9,5 @@ pub use admin::*;
 
 mod repo;
 pub use repo::*;
-
-mod page;
-pub use page::Page;
+mod tags;
+pub use tags::TagList;

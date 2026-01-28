@@ -1,4 +1,4 @@
-use domain::{Repo, RepoId};
+use domain::{Repo, RepoId, Tag};
 
 use crate::app_error::AppResult;
 
@@ -10,6 +10,19 @@ pub trait RepoRepo: Send + Sync {
     async fn upsert_many(&self, repos: &[Repo]) -> AppResult<()>;
     async fn get(&self, id: &RepoId) -> AppResult<Option<Repo>>;
     async fn list(&self, page: Pagination) -> AppResult<Page<Repo>>;
+}
+
+#[async_trait::async_trait]
+pub trait RepoTagRepo: Send + Sync {
+    async fn replace_repo_tags(&self, repo_id: &RepoId, tags: &[Tag]) -> AppResult<()>;
+    async fn list_by_repo_ids(&self, repo_ids: &[RepoId]) -> AppResult<Vec<(RepoId, Tag)>>;
+    async fn list_repo_ids_by_label(
+        &self,
+        label: &str,
+        value: Option<&str>,
+        page: Pagination,
+    ) -> AppResult<Page<RepoId>>;
+    async fn ensure_default_tag_for_repos(&self, repo_ids: &[RepoId]) -> AppResult<()>;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

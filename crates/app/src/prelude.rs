@@ -1,7 +1,14 @@
 pub use crate::app_error::{AppError, AppResult};
 pub use crate::common::pagination::{Page, PageMeta, Pagination};
 pub use crate::project::{ProjectCommandHandler, ProjectQueryHandler, ProjectRepo};
-pub use crate::repo::{GithubGateway, GithubRepoInfo, RepoCommandHandler, RepoQueryHandler, RepoRepo};
+pub use crate::repo::{
+    GithubGateway,
+    GithubRepoInfo,
+    RepoCommandHandler,
+    RepoQueryHandler,
+    RepoRepo,
+    RepoTagRepo,
+};
 pub use crate::snapshot::{
     Clock,
     IngestDailySnapshots,

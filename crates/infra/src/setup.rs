@@ -53,8 +53,8 @@ pub async fn init_app_container() -> AppResult<AppContainer> {
     };
 
     let repo = RepoState {
-        query: RepoQueryHandler::new(repos.repo.clone()),
-        command: RepoCommandHandler::new(repos.repo.clone()),
+        query: RepoQueryHandler::new(repos.repo.clone(), repos.repo_tag.clone()),
+        command: RepoCommandHandler::new(repos.repo.clone(), repos.repo_tag.clone()),
     };
 
     let snapshot_query =

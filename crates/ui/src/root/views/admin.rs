@@ -19,7 +19,7 @@ fn AdminContent() -> Element {
         div { class: "mx-auto max-w-6xl px-4 py-6 space-y-6",
             div { class: "space-y-1",
                 h1 { class: "text-2xl font-semibold tracking-tight", "Admin" }
-                p { class: "text-sm text-[color:var(--secondary-color-5)]",
+                p { class: "text-sm text-secondary-5",
                     "项目管理 / 本地手动触发 ingest（生产环境默认禁止）"
                 }
             }
@@ -56,10 +56,10 @@ fn ProjectManagement() -> Element {
     let mut json_file_name = use_signal(String::new);
 
     rsx! {
-        section { class: "rounded-xl border border-[color:var(--primary-color-6)] bg-[color:var(--primary-color-3)] p-4 space-y-4",
+        section { class: "rounded-xl border border-primary-6 bg-primary-3 p-4 space-y-4",
             div { class: "space-y-1",
                 h2 { class: "text-lg font-semibold", "Project 管理" }
-                p { class: "text-sm text-[color:var(--secondary-color-5)]",
+                p { class: "text-sm text-secondary-5",
                     "列表查看 + 单条添加（底层复用 /api/projects/import）"
                 }
             }
@@ -67,40 +67,40 @@ fn ProjectManagement() -> Element {
             div { class: "space-y-3",
                 div { class: "space-y-2",
                     input {
-                        class: "w-full rounded-md border border-[color:var(--primary-color-6)] bg-[color:var(--primary-color-1)] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[color:var(--focused-border-color)]",
+                        class: "w-full rounded-md border border-primary-6 bg-primary-1 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-focused-border",
                         placeholder: "repo_id (owner/name)",
                         value: repo_id,
                         oninput: move |e| *repo_id.write() = e.value(),
                     }
                     input {
-                        class: "w-full rounded-md border border-[color:var(--primary-color-6)] bg-[color:var(--primary-color-1)] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[color:var(--focused-border-color)]",
+                        class: "w-full rounded-md border border-primary-6 bg-primary-1 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-focused-border",
                         placeholder: "name",
                         value: name,
                         oninput: move |e| *name.write() = e.value(),
                     }
                     input {
-                        class: "w-full rounded-md border border-[color:var(--primary-color-6)] bg-[color:var(--primary-color-1)] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[color:var(--focused-border-color)]",
+                        class: "w-full rounded-md border border-primary-6 bg-primary-1 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-focused-border",
                         placeholder: "slug",
                         value: slug,
                         oninput: move |e| *slug.write() = e.value(),
                     }
                     textarea {
-                        class: "w-full min-h-[96px] rounded-md border border-[color:var(--primary-color-6)] bg-[color:var(--primary-color-1)] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[color:var(--focused-border-color)]",
+                        class: "w-full min-h-[96px] rounded-md border border-primary-6 bg-primary-1 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-focused-border",
                         placeholder: "description",
                         value: description,
                         oninput: move |e| *description.write() = e.value(),
                     }
                 }
 
-                div { class: "rounded-md border border-[color:var(--primary-color-6)] bg-[color:var(--primary-color-1)] p-3 space-y-2",
+                div { class: "rounded-md border border-primary-6 bg-primary-1 p-3 space-y-2",
                     div { class: "text-sm font-medium", "通过 JSON 文件批量导入" }
-                    div { class: "text-xs text-[color:var(--secondary-color-5)]",
+                    div { class: "text-xs text-secondary-5",
                         "JSON 格式: [{{\"name\": \"xxx\", \"full_name\": \"owner/name\"}}, ...]"
                     }
                     input {
                         r#type: "file",
                         accept: ".json,application/json",
-                        class: "block w-full text-sm text-[color:var(--secondary-color-5)] file:mr-3 file:rounded-md file:border-0 file:bg-[color:var(--primary-color-3)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[color:var(--secondary-color-6)] hover:file:bg-[color:var(--primary-color-4)]",
+                        class: "block w-full text-sm text-secondary-5 file:mr-3 file:rounded-md file:border-0 file:bg-primary-3 file:px-3 file:py-2 file:text-sm file:font-medium file:text-secondary-6 hover:file:bg-primary-4",
                         disabled: submitting(),
                         onchange: move |e| {
                             let files = e.files();
@@ -113,12 +113,12 @@ fn ProjectManagement() -> Element {
                         },
                     }
                     if !json_file_name().is_empty() {
-                        div { class: "text-xs text-[color:var(--secondary-color-5)]",
+                        div { class: "text-xs text-secondary-5",
                             "已选择: {json_file_name}"
                         }
                     }
                     button {
-                        class: "inline-flex items-center justify-center rounded-md bg-[color:var(--secondary-color-2)] px-3 py-2 text-xs font-medium text-[color:var(--primary-color)] hover:bg-[color:var(--secondary-color-1)] disabled:opacity-50 disabled:cursor-not-allowed",
+                        class: "inline-flex items-center justify-center rounded-md bg-secondary-2 px-3 py-2 text-xs font-medium text-primary hover:bg-secondary-1 disabled:opacity-50 disabled:cursor-not-allowed",
                         disabled: submitting() || json_file().is_none(),
                         onclick: move |_| {
                             let Some(file) = json_file() else {
@@ -175,7 +175,7 @@ fn ProjectManagement() -> Element {
 
                 div { class: "flex items-center gap-3",
                     button {
-                        class: "inline-flex items-center justify-center rounded-md bg-[color:var(--secondary-color-2)] px-4 py-2 text-sm font-medium text-[color:var(--primary-color)] hover:bg-[color:var(--secondary-color-1)] disabled:opacity-50 disabled:cursor-not-allowed",
+                        class: "inline-flex items-center justify-center rounded-md bg-secondary-2 px-4 py-2 text-sm font-medium text-primary hover:bg-secondary-1 disabled:opacity-50 disabled:cursor-not-allowed",
                         disabled: submitting(),
                         onclick: move |_| {
                             let repo_id_v = repo_id();
@@ -239,23 +239,23 @@ fn ProjectManagement() -> Element {
                     }
 
                     if submitting() {
-                        span { class: "text-sm text-[color:var(--secondary-color-5)]", "提交中..." }
+                        span { class: "text-sm text-secondary-5", "提交中..." }
                     }
                 }
 
                 if let Some(msg) = message() {
-                    div { class: "text-sm text-[color:var(--secondary-color-5)] whitespace-pre-wrap", "{msg}" }
+                    div { class: "text-sm text-secondary-5 whitespace-pre-wrap", "{msg}" }
                 }
             }
 
-            div { class: "pt-2 border-t border-[color:var(--primary-color-6)] space-y-2",
+            div { class: "pt-2 border-t border-primary-6 space-y-2",
                 div { class: "flex items-end justify-between",
                     h3 { class: "text-base font-semibold", "Projects 列表" }
                     match projects() {
                         Some(Ok(page)) => rsx! {
-                            span { class: "text-sm text-[color:var(--secondary-color-5)]", "total: {page.meta.total}" }
+                            span { class: "text-sm text-secondary-5", "total: {page.meta.total}" }
                         },
-                        _ => rsx! { span { class: "text-sm text-[color:var(--secondary-color-5)]", "" } },
+                        _ => rsx! { span { class: "text-sm text-secondary-5", "" } },
                     }
                 }
 
@@ -263,13 +263,13 @@ fn ProjectManagement() -> Element {
                     Some(Ok(page)) => rsx! {
                         div { class: "max-h-[520px] overflow-auto space-y-2",
                             for p in page.items {
-                                div { key: "{p.id}", class: "flex items-center justify-between gap-3 rounded-md border border-[color:var(--primary-color-6)] bg-[color:var(--primary-color-2)] px-3 py-2",
+                                div { key: "{p.id}", class: "flex items-center justify-between gap-3 rounded-md border border-primary-6 bg-primary-2 px-3 py-2",
                                     div { class: "min-w-0",
                                         div { class: "font-medium truncate", "{p.name}" }
-                                        div { class: "text-xs text-[color:var(--secondary-color-5)] truncate", "{p.repo_id}" }
+                                        div { class: "text-xs text-secondary-5 truncate", "{p.repo_id}" }
                                     }
                                     div { class: "flex items-center gap-3 shrink-0",
-                                        div { class: "text-xs text-[color:var(--secondary-color-5)]", "{p.slug}" }
+                                        div { class: "text-xs text-secondary-5", "{p.slug}" }
                                         button {
                                             class: "text-xs text-red-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed",
                                             disabled: submitting(),
@@ -299,7 +299,7 @@ fn ProjectManagement() -> Element {
                         }
                     },
                     Some(Err(e)) => Err(e)?,
-                    None => rsx! { div { class: "text-sm text-[color:var(--secondary-color-5)]", "Loading projects..." } },
+                    None => rsx! { div { class: "text-sm text-secondary-5", "Loading projects..." } },
                 }
             }
         }
@@ -322,44 +322,44 @@ fn IngestDailySnapshotsControl() -> Element {
     })?;
 
     rsx! {
-        section { class: "rounded-xl border border-[color:var(--primary-color-6)] bg-[color:var(--primary-color-3)] p-4 space-y-4",
+        section { class: "rounded-xl border border-primary-6 bg-primary-3 p-4 space-y-4",
             div { class: "space-y-1",
                 h2 { class: "text-lg font-semibold", "Ingest Daily Snapshots" }
-                p { class: "text-sm text-[color:var(--secondary-color-5)]",
+                p { class: "text-sm text-secondary-5",
                     "用于本地开发：手动触发一次 ingest（production 环境会返回 403）。"
                 }
             }
 
             button {
-                class: "inline-flex items-center justify-center rounded-md bg-[color:var(--secondary-color-2)] px-4 py-2 text-sm font-medium text-[color:var(--primary-color)] hover:bg-[color:var(--secondary-color-1)]",
+                class: "inline-flex items-center justify-center rounded-md bg-secondary-2 px-4 py-2 text-sm font-medium text-primary hover:bg-secondary-1",
                 onclick: move |_| run_nonce.with_mut(|v| *v += 1),
                 "Run once"
             }
 
-            div { class: "pt-2 border-t border-[color:var(--primary-color-6)]",
+            div { class: "pt-2 border-t border-primary-6",
                 match run_result() {
                     Some(Ok(Some(res))) => rsx! {
                         div { class: "grid grid-cols-1 gap-2 text-sm",
                             div { class: "flex items-center justify-between",
-                                span { class: "text-[color:var(--secondary-color-5)]", "projects" }
+                                span { class: "text-secondary-5", "projects" }
                                 span { class: "font-medium", "{res.projects}" }
                             }
                             div { class: "flex items-center justify-between",
-                                span { class: "text-[color:var(--secondary-color-5)]", "repos_upserted" }
+                                span { class: "text-secondary-5", "repos_upserted" }
                                 span { class: "font-medium", "{res.repos_upserted}" }
                             }
                             div { class: "flex items-center justify-between",
-                                span { class: "text-[color:var(--secondary-color-5)]", "snapshots_inserted" }
+                                span { class: "text-secondary-5", "snapshots_inserted" }
                                 span { class: "font-medium", "{res.snapshots_inserted}" }
                             }
                         }
                     },
                     Some(Ok(None)) => rsx! {
-                        div { class: "text-sm text-[color:var(--secondary-color-5)]", "尚未运行" }
+                        div { class: "text-sm text-secondary-5", "尚未运行" }
                     },
                     Some(Err(e)) => Err(e)?,
                     None => rsx! {
-                        div { class: "text-sm text-[color:var(--secondary-color-5)]", "Running..." }
+                        div { class: "text-sm text-secondary-5", "Running..." }
                     },
                 }
             }
