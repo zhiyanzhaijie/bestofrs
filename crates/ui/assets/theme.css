@@ -1,3 +1,13 @@
+:root[data-theme="dark"] {
+  --dark: initial;
+  --light: ;
+}
+
+:root[data-theme="light"] {
+  --dark: ;
+  --light: initial;
+}
+
 @theme inline {
   --color-primary: var(--primary-color);
   --color-primary-1: var(--primary-color-1);

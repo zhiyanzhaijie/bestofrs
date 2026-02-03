@@ -1,6 +1,6 @@
 use crate::{
-    components::{icons, toast::ToastProvider, UserProfile},
-    root::routes::Route,
+    components::{icons, toast::ToastProvider, FuzzySearch, UserProfile},
+    root::Route,
     root::theme::{is_dark_mode, theme_seed, toggle_theme},
     IO::auth::me,
 };
@@ -59,6 +59,7 @@ pub fn RootLayout() -> Element {
                         }
                     }
                     div { class: "flex items-center gap-3",
+                        FuzzySearch {}
                         button {
                             class: "inline-flex items-center justify-center rounded-md border border-primary-6 bg-primary-1 p-2 text-secondary-5 hover:bg-primary-4",
                             onclick: move |_| {

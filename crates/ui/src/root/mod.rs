@@ -4,7 +4,7 @@ pub mod layouts;
 mod views;
 
 use dioxus::prelude::*;
-use routes::Route;
+pub use routes::Route;
 
 pub const FAVICON: Asset = asset!("/assets/favicon.ico");
 pub const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");

@@ -3,6 +3,7 @@ use dioxus::prelude::*;
 use crate::impls::error::api_error;
 use crate::impls::state::State;
 use crate::types::repos::RepoDto;
+use crate::types::search::SearchResultDto;
 use crate::types::snapshot_deltas::SnapshotDeltaDto;
 use crate::types::snapshots::SnapshotDto;
 use crate::types::tags::TagDto;
@@ -22,6 +23,18 @@ pub async fn list_repos(page: Pagination) -> ServerFnResult<Page<RepoDto>> {
         .map_err(api_error)?;
 
     Ok(repos_page.map(RepoDto::from))
+}
+
+#[post("/api/repos/search", state: State)]
+pub async fn search_repos(key: String, page: Pagination) -> ServerFnResult<SearchResultDto> {
+    let app_state = state.0;
+    let result = app_state
+        .repo
+        .query
+        .search_by_key(&key, page)
+        .await
+        .map_err(api_error)?;
+    Ok(SearchResultDto::from(result))
 }
 
 #[post("/api/repos/:owner/:name", state: State)]

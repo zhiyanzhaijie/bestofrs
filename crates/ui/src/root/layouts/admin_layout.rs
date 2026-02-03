@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::root::routes::Route;
+use crate::root::Route;
 use crate::root::layouts::{UserContext, UserState};
 
 #[component]
