@@ -2,7 +2,7 @@ use app::app_error::AppResult;
 use app::common::pagination::{Page, Pagination};
 use app::snapshot::{SnapshotDelta, SnapshotDeltaRepo, SnapshotRepo};
 use domain::{RepoId, Snapshot};
-use sqlx::{QueryBuilder, Postgres};
+use sqlx::{Postgres, QueryBuilder};
 
 use super::db_err;
 
@@ -271,13 +271,12 @@ impl SnapshotDeltaRepo for PostgresSnapshotRepo {
         let limit = page.limit();
         let offset = page.offset();
 
-        let total: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM snapshot_deltas WHERE repo_id = $1",
-        )
-        .bind(repo_id.as_str())
-        .fetch_one(&self.pool)
-        .await
-        .map_err(db_err)?;
+        let total: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM snapshot_deltas WHERE repo_id = $1")
+                .bind(repo_id.as_str())
+                .fetch_one(&self.pool)
+                .await
+                .map_err(db_err)?;
         let rows: Vec<SnapshotDeltaDb> = sqlx::query_as(
             r#"
             SELECT

@@ -1,9 +1,9 @@
+use super::db_err;
 use app::app_error::AppResult;
 use app::common::pagination::{Page, Pagination};
 use app::snapshot::{SnapshotDelta, SnapshotDeltaRepo, SnapshotRepo};
 use domain::{RepoId, Snapshot};
 use sqlx::{QueryBuilder, Sqlite};
-use super::db_err;
 
 #[derive(Debug, sqlx::FromRow)]
 struct SnapshotDb {
@@ -65,7 +65,6 @@ impl SqliteSnapshotRepo {
         Self { pool }
     }
 }
-
 
 #[async_trait::async_trait]
 impl SnapshotRepo for SqliteSnapshotRepo {

@@ -1,9 +1,9 @@
+use super::db_err;
 use app::app_error::AppResult;
 use app::common::pagination::{Page, Pagination};
 use app::project::ProjectRepo;
 use domain::{Project, RepoId};
 use sqlx::{QueryBuilder, Sqlite};
-use super::db_err;
 
 #[derive(Debug, sqlx::FromRow)]
 struct ProjectDb {
@@ -48,7 +48,6 @@ impl SqliteProjectRepo {
         Self { pool }
     }
 }
-
 
 #[async_trait::async_trait]
 impl ProjectRepo for SqliteProjectRepo {

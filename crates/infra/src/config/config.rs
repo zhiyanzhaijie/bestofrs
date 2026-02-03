@@ -6,6 +6,8 @@ use std::net::SocketAddr;
 pub struct Config {
     pub server: ServerConfig,
     pub database: DatabaseConfig,
+    #[serde(default)]
+    pub auth: AuthConfig,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -18,6 +20,36 @@ pub struct ServerConfig {
 #[derive(Debug, Clone, Deserialize)]
 pub struct DatabaseConfig {
     pub url: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct AuthConfig {
+    #[serde(default)]
+    pub github_client_id: String,
+    #[serde(default)]
+    pub github_client_secret: String,
+    #[serde(default)]
+    pub github_redirect_url: String,
+    #[serde(default)]
+    pub admin_github_ids: Vec<i64>,
+    #[serde(default = "default_session_ttl_seconds")]
+    pub session_ttl_seconds: u64,
+}
+
+impl Default for AuthConfig {
+    fn default() -> Self {
+        Self {
+            github_client_id: String::new(),
+            github_client_secret: String::new(),
+            github_redirect_url: String::new(),
+            admin_github_ids: Vec::new(),
+            session_ttl_seconds: default_session_ttl_seconds(),
+        }
+    }
+}
+
+fn default_session_ttl_seconds() -> u64 {
+    60 * 60 * 24 * 7
 }
 
 impl Config {

@@ -42,7 +42,11 @@ impl RepoQueryHandler {
 
     pub async fn list_with_tags(&self, page: Pagination) -> AppResult<Page<RepoWithTags>> {
         let repos_page = self.repos.list(page).await?;
-        let repo_ids: Vec<RepoId> = repos_page.items.iter().map(|repo| repo.id.clone()).collect();
+        let repo_ids: Vec<RepoId> = repos_page
+            .items
+            .iter()
+            .map(|repo| repo.id.clone())
+            .collect();
         let pairs = self.repo_tags.list_by_repo_ids(&repo_ids).await?;
         let mut tags_by_repo: HashMap<RepoId, Vec<Tag>> = HashMap::new();
         for (repo_id, tag) in pairs {

@@ -20,10 +20,7 @@ impl SnapshotEventHandler {
         self.handle_snapshots_recorded(&[event]).await
     }
 
-    pub async fn handle_snapshots_recorded(
-        &self,
-        events: &[SnapshotRecorded],
-    ) -> AppResult<()> {
+    pub async fn handle_snapshots_recorded(&self, events: &[SnapshotRecorded]) -> AppResult<()> {
         if events.is_empty() {
             return Ok(());
         }

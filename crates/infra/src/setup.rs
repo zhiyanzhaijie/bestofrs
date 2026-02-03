@@ -1,16 +1,18 @@
 use std::sync::Arc;
 
-
 use adapters::persistence;
-use app::prelude::{
-    IngestDailySnapshots, ProjectCommandHandler, ProjectQueryHandler, RepoCommandHandler,
-    RepoQueryHandler, SnapshotCommandHandler, SnapshotEventHandler, SnapshotQueryHandler,
-};
 use app::app_error::{AppError, AppResult};
+use app::prelude::{
+    AuthCommandHandler, IngestDailySnapshots, ProjectCommandHandler, ProjectQueryHandler,
+    RepoCommandHandler, RepoQueryHandler, SnapshotCommandHandler, SnapshotEventHandler,
+    SnapshotQueryHandler,
+};
+use app::auth::{OAuth2AuthorizationCodePkcePort, OAuth2ResourceOwnerPort};
 
+use crate::config::Config as AppConfig;
+use adapters::auth::{ConfigRolePolicy, GithubOAuthAdapter};
 use adapters::clock::SystemClock;
 use adapters::github::GithubClient;
-use crate::config::Config as AppConfig;
 
 pub struct ProjectState {
     pub query: ProjectQueryHandler,
@@ -27,8 +29,14 @@ pub struct SnapshotState {
     pub command: SnapshotCommandHandler,
 }
 
+pub struct AuthState {
+    pub command: AuthCommandHandler,
+}
+
 pub struct AppContainer {
     pub config: AppConfig,
+
+    pub auth: AuthState,
 
     pub project: ProjectState,
     pub repo: RepoState,
@@ -66,6 +74,21 @@ pub async fn init_app_container() -> AppResult<AppContainer> {
         command: SnapshotCommandHandler::new(repos.snapshot, snapshot_event_handler),
     };
 
+    let provider = Arc::new(GithubOAuthAdapter::new(
+        config.auth.github_client_id.clone(),
+        config.auth.github_client_secret.clone(),
+        config.auth.github_redirect_url.clone(),
+    )?);
+
+    let oauth: Arc<dyn OAuth2AuthorizationCodePkcePort> = provider.clone();
+    let resource_owner: Arc<dyn OAuth2ResourceOwnerPort> = provider.clone();
+
+    let role_policy = Arc::new(ConfigRolePolicy::new(config.auth.admin_github_ids.clone()));
+
+    let auth = AuthState {
+        command: AuthCommandHandler::new(oauth, resource_owner, role_policy),
+    };
+
     let github = Arc::new(GithubClient::new(Some(config.server.github_token.clone()))?);
     let clock = Arc::new(SystemClock);
 
@@ -79,6 +102,7 @@ pub async fn init_app_container() -> AppResult<AppContainer> {
 
     Ok(AppContainer {
         config,
+        auth,
         project,
         repo,
         snapshot,

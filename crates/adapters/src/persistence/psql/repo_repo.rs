@@ -2,7 +2,7 @@ use app::app_error::AppResult;
 use app::common::pagination::{Page, Pagination};
 use app::repo::RepoRepo;
 use domain::{Repo, RepoId};
-use sqlx::{QueryBuilder, Postgres};
+use sqlx::{Postgres, QueryBuilder};
 
 use super::db_err;
 

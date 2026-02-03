@@ -66,9 +66,8 @@ impl RepoTagRepo for PostgresRepoTagRepo {
                 .push_bind(tag.label.as_str())
                 .push_bind(tag.value.as_str());
         });
-        tag_builder.push(
-            " ON CONFLICT(id) DO UPDATE SET label = excluded.label, value = excluded.value",
-        );
+        tag_builder
+            .push(" ON CONFLICT(id) DO UPDATE SET label = excluded.label, value = excluded.value");
         tag_builder
             .build()
             .execute(&mut *tx)
@@ -172,13 +171,15 @@ impl RepoTagRepo for PostgresRepoTagRepo {
         }
         let mut tx = self.pool.begin().await.map_err(db_err)?;
         let default_id = tag_id(DEFAULT_TAG_LABEL, DEFAULT_TAG_VALUE);
-        sqlx::query("INSERT INTO tags (id, label, value) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING")
-            .bind(&default_id)
-            .bind(DEFAULT_TAG_LABEL)
-            .bind(DEFAULT_TAG_VALUE)
-            .execute(&mut *tx)
-            .await
-            .map_err(db_err)?;
+        sqlx::query(
+            "INSERT INTO tags (id, label, value) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING",
+        )
+        .bind(&default_id)
+        .bind(DEFAULT_TAG_LABEL)
+        .bind(DEFAULT_TAG_VALUE)
+        .execute(&mut *tx)
+        .await
+        .map_err(db_err)?;
 
         let mut builder: QueryBuilder<Postgres> = QueryBuilder::new(
             "INSERT INTO repo_tag_map (repo_id, tag_id, source) \
@@ -195,11 +196,7 @@ impl RepoTagRepo for PostgresRepoTagRepo {
             builder.push_bind(repo_id.as_str());
         }
         builder.push(") AND NOT EXISTS (SELECT 1 FROM repo_tag_map m WHERE m.repo_id = r.id)");
-        builder
-            .build()
-            .execute(&mut *tx)
-            .await
-            .map_err(db_err)?;
+        builder.build().execute(&mut *tx).await.map_err(db_err)?;
 
         tx.commit().await.map_err(db_err)?;
         Ok(())

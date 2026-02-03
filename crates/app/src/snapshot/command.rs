@@ -27,7 +27,6 @@ impl SnapshotCommandHandler {
         self.insert_daily_many(std::slice::from_ref(snapshot)).await
     }
 
-
     pub async fn insert_daily_many(&self, snapshots: &[Snapshot]) -> AppResult<()> {
         if snapshots.is_empty() {
             return Ok(());

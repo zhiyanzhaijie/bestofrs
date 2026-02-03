@@ -48,10 +48,7 @@ impl RepoCommandHandler {
         self.repo_tags.replace_repo_tags(repo_id, tags).await
     }
 
-    pub async fn replace_tags_by_repo_id(
-        &self,
-        cmd: ReplaceRepoTagsCommand,
-    ) -> AppResult<()> {
+    pub async fn replace_tags_by_repo_id(&self, cmd: ReplaceRepoTagsCommand) -> AppResult<()> {
         let repo_id = RepoId::parse(&cmd.repo_id)?;
         let tags = cmd
             .tags

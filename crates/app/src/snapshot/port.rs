@@ -10,11 +10,7 @@ pub trait SnapshotRepo: Send + Sync {
     async fn insert_daily(&self, snapshot: &Snapshot) -> AppResult<()>;
     async fn insert_daily_many(&self, snapshots: &[Snapshot]) -> AppResult<()>;
 
-    async fn list_by_repo(
-        &self,
-        repo_id: &RepoId,
-        page: Pagination,
-    ) -> AppResult<Page<Snapshot>>;
+    async fn list_by_repo(&self, repo_id: &RepoId, page: Pagination) -> AppResult<Page<Snapshot>>;
 }
 
 /// Delta derived from snapshots.
@@ -37,7 +33,11 @@ pub struct SnapshotDelta {
 pub trait SnapshotDeltaRepo: Send + Sync {
     async fn upsert(&self, item: &SnapshotDelta) -> AppResult<()>;
     async fn upsert_many(&self, items: &[SnapshotDelta]) -> AppResult<()>;
-    async fn upsert_for_date(&self, repo_ids: &[RepoId], snapshot_date: NaiveDate) -> AppResult<usize>;
+    async fn upsert_for_date(
+        &self,
+        repo_ids: &[RepoId],
+        snapshot_date: NaiveDate,
+    ) -> AppResult<usize>;
 
     async fn list_by_repo(
         &self,
