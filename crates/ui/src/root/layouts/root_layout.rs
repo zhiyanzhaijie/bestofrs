@@ -1,6 +1,6 @@
 use crate::types::auth::MeDto;
 use crate::{
-    components::{icons, toast::ToastProvider, FuzzySearch, UserProfile},
+    components::{icons, skeleton::Skeleton, toast::ToastProvider, FuzzySearch, UserProfile},
     root::theme::{is_dark_mode, theme_seed, toggle_theme},
     root::Route,
     IO::auth::me,
@@ -79,7 +79,16 @@ pub fn RootLayout() -> Element {
             }
 
             main { class: "min-h-screen",
-                Outlet::<Route> {}
+                SuspenseBoundary {
+                    fallback: move |_: SuspenseContext| {
+                        rsx! {
+                            div { class: "mx-auto max-w-6xl px-4 py-6",
+                                Skeleton { class: "w-full h-[420px]" }
+                            }
+                        }
+                    },
+                    Outlet::<Route> {}
+                }
             }
         }
     }
