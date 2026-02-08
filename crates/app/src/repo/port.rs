@@ -46,7 +46,15 @@ pub struct GithubRepoInfo {
     pub subscribers_count: i64,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GithubReadme {
+    pub content: String,
+    pub html_url: Option<String>,
+    pub download_url: Option<String>,
+}
+
 #[async_trait]
 pub trait GithubGateway: Send + Sync {
     async fn fetch_repo(&self, full_name: &str) -> AppResult<GithubRepoInfo>;
+    async fn fetch_readme(&self, full_name: &str) -> AppResult<Option<GithubReadme>>;
 }

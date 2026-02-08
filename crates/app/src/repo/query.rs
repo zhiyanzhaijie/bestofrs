@@ -6,7 +6,7 @@ use domain::{Repo, RepoId, RepoWithTags, Tag};
 
 use crate::app_error::AppResult;
 use crate::common::{Page, Pagination};
-use crate::repo::{RepoRepo, RepoSearchCache, RepoTagRepo};
+use crate::repo::{GithubGateway, RepoRepo, RepoSearchCache, RepoTagRepo};
 
 #[derive(Debug, Clone)]
 pub struct RepoSearchResult {
@@ -18,14 +18,20 @@ pub struct RepoSearchResult {
 pub struct RepoQueryHandler {
     repos: Arc<dyn RepoRepo>,
     repo_tags: Arc<dyn RepoTagRepo>,
+    github: Arc<dyn GithubGateway>,
     cache: Option<Arc<dyn RepoSearchCache>>,
 }
 
 impl RepoQueryHandler {
-    pub fn new(repos: Arc<dyn RepoRepo>, repo_tags: Arc<dyn RepoTagRepo>) -> Self {
+    pub fn new(
+        repos: Arc<dyn RepoRepo>,
+        repo_tags: Arc<dyn RepoTagRepo>,
+        github: Arc<dyn GithubGateway>,
+    ) -> Self {
         Self {
             repos,
             repo_tags,
+            github,
             cache: None,
         }
     }
@@ -33,11 +39,13 @@ impl RepoQueryHandler {
     pub fn new_with_cache(
         repos: Arc<dyn RepoRepo>,
         repo_tags: Arc<dyn RepoTagRepo>,
+        github: Arc<dyn GithubGateway>,
         cache: Arc<dyn RepoSearchCache>,
     ) -> Self {
         Self {
             repos,
             repo_tags,
+            github,
             cache: Some(cache),
         }
     }
@@ -136,6 +144,15 @@ impl RepoQueryHandler {
         let full_name = format!("{owner}/{name}");
         let repo_id = RepoId::parse(&full_name)?;
         self.get_with_tags(&repo_id).await
+    }
+
+    pub async fn get_readme_by_owner_name(
+        &self,
+        owner: &str,
+        name: &str,
+    ) -> AppResult<Option<crate::repo::GithubReadme>> {
+        let full_name = format!("{owner}/{name}");
+        self.github.fetch_readme(&full_name).await
     }
 
     pub async fn search_by_key(&self, key: &str, page: Pagination) -> AppResult<RepoSearchResult> {

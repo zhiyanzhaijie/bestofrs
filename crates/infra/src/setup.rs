@@ -60,8 +60,10 @@ pub async fn init_app_container() -> AppResult<AppContainer> {
         command: ProjectCommandHandler::new(repos.project.clone()),
     };
 
+    let github = Arc::new(GithubClient::new(Some(config.server.github_token.clone()))?);
+
     let repo = RepoState {
-        query: RepoQueryHandler::new(repos.repo.clone(), repos.repo_tag.clone()),
+        query: RepoQueryHandler::new(repos.repo.clone(), repos.repo_tag.clone(), github.clone()),
         command: RepoCommandHandler::new(repos.repo.clone(), repos.repo_tag.clone()),
     };
 
@@ -89,7 +91,6 @@ pub async fn init_app_container() -> AppResult<AppContainer> {
         command: AuthCommandHandler::new(oauth, resource_owner, role_policy),
     };
 
-    let github = Arc::new(GithubClient::new(Some(config.server.github_token.clone()))?);
     let clock = Arc::new(SystemClock);
 
     let ingest_daily_snapshots = IngestDailySnapshots::new(
