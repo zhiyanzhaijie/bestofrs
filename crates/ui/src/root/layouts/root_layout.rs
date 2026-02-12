@@ -50,7 +50,9 @@ pub fn RootLayout() -> Element {
 
     rsx! {
         ToastProvider {
-            div { class: "min-h-screen bg-primary-1 text-secondary-5 flex flex-col",
+            div {
+                class: "min-h-screen bg-primary-1 text-secondary-5 flex flex-col",
+                style: "--header-height: 6rem;",
                 header {
                     class: "fixed inset-x-0 top-0 z-50 border-b border-primary-6 bg-primary-2/85 shadow-sm",
                     div { class: "relative",
@@ -82,12 +84,12 @@ pub fn RootLayout() -> Element {
                 }
 
                 main {
-                    class: "mx-auto w-full max-w-6xl flex-1 px-4 pb-10 pt-24",
+                    class: "mx-auto w-full max-w-6xl flex-1 px-4 pb-10 pt-[var(--header-height)]",
                     SuspenseBoundary {
                         fallback: move |_: SuspenseContext| {
                             rsx! {
-                                div { class: "py-6",
-                                    Skeleton { class: "h-[420px] w-full rounded-xl border border-primary-6 bg-primary-2" }
+                                div { class: "py-8 h-[calc(100dvh-var(--header-height))]",
+                                    Skeleton { class: "skeleton h-full min-h-[420px] w-full rounded-xl border border-primary-6" }
                                 }
                             }
                         },

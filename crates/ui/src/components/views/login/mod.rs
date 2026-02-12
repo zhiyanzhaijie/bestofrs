@@ -18,7 +18,7 @@ pub fn Login() -> Element {
     });
 
     rsx! {
-        div { class: "mx-auto max-w-6xl px-4 py-8",
+        div { class: "py-8",
             div { class: "rounded-xl border border-primary-6 bg-primary-2 p-6 space-y-2",
                 h1 { class: "text-2xl font-semibold tracking-tight", "Login" }
                 div { class: "text-sm text-secondary-5", "Redirecting to GitHub..." }

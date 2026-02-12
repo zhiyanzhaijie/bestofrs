@@ -24,7 +24,7 @@ pub fn RepoListContent(title: String, subtitle: String) -> Element {
     })?;
 
     rsx! {
-        div { class: "mx-auto max-w-6xl px-4 py-8 space-y-6",
+        div { class: "py-8 space-y-6",
             div { class: "rounded-xl border border-primary-6 bg-primary-2 px-6 py-6 space-y-6",
                 div { class: "space-y-2",
                     h1 { class: "text-2xl font-semibold tracking-tight text-secondary-4", "{title}" }

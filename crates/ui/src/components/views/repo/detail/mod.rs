@@ -38,7 +38,7 @@ fn RepoDetailPageContent(owner: String, name: String) -> Element {
     })?;
 
     rsx! {
-        div { class: "mx-auto max-w-6xl px-4 py-8 space-y-6",
+        div { class: "py-8 space-y-6",
             div { class: "flex items-center justify-between gap-4",
                 div { class: "space-y-1 min-w-0",
                     h1 { class: "text-2xl font-semibold tracking-tight truncate", "{owner}/{name}" }

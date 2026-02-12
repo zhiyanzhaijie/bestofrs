@@ -18,7 +18,7 @@ pub fn Admin() -> Element {
 #[component]
 fn AdminContent() -> Element {
     rsx! {
-        div { class: "mx-auto max-w-6xl px-4 py-8 space-y-6",
+        div { class: "py-8 space-y-6",
             div { class: "space-y-1",
                 h1 { class: "text-2xl font-semibold tracking-tight", "Admin" }
                 p { class: "text-sm text-secondary-5",
