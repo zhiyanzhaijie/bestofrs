@@ -15,7 +15,7 @@ pub fn ReadmeSection(owner: String, name: String, refresh_tick: Signal<u32>) -> 
     })?;
 
     rsx! {
-        section { class: "rounded-xl border border-primary-6 bg-primary-2 p-5 space-y-4",
+        section { class: "space-y-4 border border-secondary-2 bg-primary p-5 shadow-comic-sm",
             div { class: "space-y-1",
                 h2 { class: "text-lg font-semibold", "README" }
                 p { class: "text-sm text-secondary-5", "Rendered from GitHub README" }

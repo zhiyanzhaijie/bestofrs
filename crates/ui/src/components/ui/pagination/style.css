@@ -4,91 +4,83 @@
   justify-content: center;
   margin: 0 auto;
 }
-
 .pagination-content {
   display: flex;
   align-items: center;
   padding: 0;
   margin: 0;
-  gap: 0.25rem;
+  gap: 0.5rem;
   list-style: none;
 }
-
 .pagination-link {
   display: inline-flex;
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
-  border-radius: 0.5rem;
+  border: 1px solid var(--primary-color-6);
+  border-radius: 9999px;
+  background: var(--primary-color-1);
   color: var(--secondary-color-4);
   font-size: 0.875rem;
   font-weight: 500;
   gap: 0.5rem;
   line-height: 1;
   text-decoration: none;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: transform 0.15s ease, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
-
 .pagination-link:focus-visible {
-  box-shadow: 0 0 0 2px var(--focused-border-color);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--focused-border-color) 45%, transparent);
+  outline: none;
 }
-
 .pagination-link[data-size="icon"] {
   width: 2.25rem;
   height: 2.25rem;
   padding: 0;
 }
-
 .pagination-ellipsis {
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--secondary-color-4);
 }
-
 .pagination-link[data-size="icon"],
 .pagination-ellipsis {
   width: 2.25rem;
   height: 2.25rem;
 }
-
 .pagination-link[data-size="default"] {
   height: 2.25rem;
   padding: 0.5rem 1rem;
 }
-
 .pagination-link[data-active="true"] {
-  border: 1px solid var(--primary-color-6);
-  background-color: var(--light, var(--primary-color)) var(--dark, var(--primary-color-3));
+  border-color: var(--secondary-color-2);
+  background-color: var(--secondary-color-2);
+  color: var(--primary-color);
+  box-shadow: 2px 2px 0 0 color-mix(in oklab, var(--primary-color-6) 75%, transparent);
 }
-
 .pagination-link[data-active="true"]:hover {
-  background-color: var(--primary-color-4);
+  background-color: var(--secondary-color-1);
 }
-
 .pagination-link[data-active="false"]:hover {
-  background-color: var(--primary-color-5);
-  color: var(--secondary-color-1);
+  background-color: var(--primary-color-2);
+  color: var(--secondary-color-3);
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 0 color-mix(in oklab, var(--primary-color-6) 75%, transparent);
 }
-
 .pagination-link[data-kind="previous"],
 .pagination-link[data-kind="next"] {
   padding-right: 0.625rem;
   padding-left: 0.625rem;
   gap: 0.25rem;
 }
-
 .pagination-label {
   display: none;
 }
-
 @media (width >= 640px) {
   .pagination-label {
     display: inline;
   }
 }
-
-
 .pagination-icon {
   width: 1rem;
   height: 1rem;
@@ -98,10 +90,6 @@
   stroke-linejoin: round;
   stroke-width: 2;
 }
-
-/* TODO: move to shared css */
-
-/* Screen-reader only text */
 .sr-only {
   position: absolute;
   overflow: hidden;

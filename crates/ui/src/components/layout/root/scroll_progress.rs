@@ -12,10 +12,10 @@ pub fn ScrollProgress() -> Element {
     });
 
     rsx! {
-        div { class: "absolute inset-x-0 top-0 h-0.5 bg-primary-6/40",
+        div { class: "pointer-events-none fixed left-0 top-0 z-[70] h-0.5 w-screen bg-primary-6/50",
             div {
                 id: "root-scroll-progress",
-                class: "h-full w-0 bg-secondary-4 transition-[width] duration-75",
+                class: "h-full w-0 bg-secondary-3 transition-[width] duration-100 ease-out",
                 role: "progressbar",
                 aria_label: "Page scroll progress",
                 aria_valuemin: "0",

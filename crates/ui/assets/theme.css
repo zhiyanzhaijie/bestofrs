@@ -8,6 +8,85 @@
   --light: initial;
 }
 
+:root {
+  --grid-accent: #e8473c;
+  --grid-line-color: color-mix(in oklab, var(--grid-accent) 24%, transparent);
+  --grid-dot-color: var(--grid-accent);
+  --grid-screentone-color: color-mix(in oklab, var(--grid-accent) 55%, transparent);
+  --grid-hatch-color: color-mix(in oklab, var(--grid-accent) 45%, transparent);
+  --grid-matrix-color: color-mix(in oklab, var(--grid-accent) 22%, transparent);
+}
+
+:root[data-grid-theme="red"] {
+  --grid-accent: #e8473c;
+  --focused-border-color: var(--grid-accent);
+  --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
+  --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
+  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
+  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
+  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+}
+
+:root[data-grid-theme="orange"] {
+  --grid-accent: #f28c1b;
+  --focused-border-color: var(--grid-accent);
+  --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
+  --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
+  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
+  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
+  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+}
+
+:root[data-grid-theme="yellow"] {
+  --grid-accent: #d4b100;
+  --focused-border-color: var(--grid-accent);
+  --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
+  --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
+  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
+  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
+  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+}
+
+:root[data-grid-theme="green"] {
+  --grid-accent: #2fa84f;
+  --focused-border-color: var(--grid-accent);
+  --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
+  --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
+  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
+  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
+  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+}
+
+:root[data-grid-theme="cyan"] {
+  --grid-accent: #1aa6a6;
+  --focused-border-color: var(--grid-accent);
+  --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
+  --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
+  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
+  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
+  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+}
+
+:root[data-grid-theme="blue"] {
+  --grid-accent: #1aa6a6;
+  --focused-border-color: var(--grid-accent);
+  --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
+  --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
+  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
+  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
+  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+}
+
+:root[data-grid-theme="purple"] {
+  --grid-accent: #8756c9;
+  --focused-border-color: var(--grid-accent);
+  --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
+  --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
+  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
+  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
+  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+}
+
 @theme inline {
   --color-primary: var(--primary-color);
   --color-primary-1: var(--primary-color-1);
@@ -36,4 +115,80 @@
   --color-contrast-error: var(--contrast-error-color);
   --color-primary-info: var(--primary-info-color);
   --color-secondary-info: var(--secondary-info-color);
+}
+
+.bg-screentone {
+  background-color: var(--primary-color);
+  background-image: radial-gradient(var(--grid-screentone-color) 1px, transparent 1px);
+  background-size: 12px 12px;
+}
+
+.bg-hatch {
+  background-color: var(--primary-color);
+}
+
+.scanlines {
+  background: linear-gradient(to bottom,
+      rgb(255 255 255 / 0%),
+      rgb(255 255 255 / 0%) 50%,
+      rgb(0 0 0 / 6%) 50%,
+      rgb(0 0 0 / 6%));
+  background-size: 100% 4px;
+}
+
+.pixel-matrix {
+  background-image:
+    linear-gradient(var(--grid-matrix-color) 0.5px, transparent 0.5px),
+    linear-gradient(90deg, var(--grid-matrix-color) 0.5px, transparent 0.5px);
+  background-size: 9px 9px;
+}
+
+.grid-line-left {
+  border-left: 1px solid var(--grid-line-color);
+}
+
+.grid-line-right {
+  border-right: 1px solid var(--grid-line-color);
+}
+
+.grid-line-bottom {
+  border-bottom: 1px solid var(--grid-line-color);
+}
+
+.grid-line-left-dashed {
+  border-left: 1px dashed var(--grid-line-color);
+}
+
+.grid-line-right-dashed {
+  border-right: 1px dashed var(--grid-line-color);
+}
+
+.grid-line-bottom-dashed {
+  border-bottom: 1px dashed var(--grid-line-color);
+}
+
+.grid-dot {
+  background-color: var(--grid-dot-color);
+}
+
+.grid-gradient-overlay {
+  --tw-gradient-from: color-mix(in oklab, var(--grid-accent) 8%, transparent);
+  --tw-gradient-to: transparent;
+  --tw-gradient-stops: var(--tw-gradient-from), transparent 61.8%, var(--tw-gradient-to);
+}
+
+:root[data-theme="dark"] .grid-gradient-overlay {
+  --tw-gradient-from: color-mix(in oklab, var(--grid-accent) 12%, transparent);
+}
+
+.shadow-comic {
+  box-shadow: 4px 4px 0 0 color-mix(in oklab, var(--primary-color-6) 70%, transparent);
+}
+
+.shadow-comic-hover {
+  box-shadow: 6px 6px 0 0 color-mix(in oklab, var(--primary-color-6) 90%, transparent);
+}
+
+.shadow-comic-sm {
+  box-shadow: 2px 2px 0 0 color-mix(in oklab, var(--primary-color-6) 70%, transparent);
 }

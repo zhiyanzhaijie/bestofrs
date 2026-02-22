@@ -1,8 +1,10 @@
 use std::collections::BTreeMap;
 
 use dioxus::prelude::*;
-
-use crate::components::common::RepoRow;
+use crate::components::common::{
+    GradientDirection, GridBackground, GridPadding, GridPattern, GridSlashTransition, GridType,
+    GridWrapper, RepoManuscriptCard,
+};
 use crate::IO::repos::list_repos;
 use app::prelude::Pagination;
 
@@ -26,16 +28,32 @@ pub fn TagList() -> Element {
     })?;
 
     rsx! {
-        div { class: "py-8 space-y-6",
-            div { class: "space-y-1 rounded-xl border border-primary-6 bg-primary-2 p-5",
-                h1 { class: "text-2xl font-semibold tracking-tight", "Tags" }
-                p { class: "text-sm text-secondary-5", "Tag list" }
+        div { class: "space-y-0",
+            GridWrapper {
+                grid_type: GridType::Default,
+                padding: GridPadding::Lg,
+                is_dot_on: true,
+                background: GridBackground {
+                    pattern: GridPattern::Dot,
+                    gradient: GradientDirection::ToBottom,
+                },
+                section { class: "relative overflow-hidden bg-primary",
+                    div { class: "relative z-10 space-y-3",
+                        h1 { class: "text-4xl font-bold tracking-tight text-secondary-2", "Archives" }
+                        p { class: "max-w-2xl text-sm leading-relaxed text-secondary-5",
+                            "Browse the collection by category. The index is organized by primary domain applications."
+                        }
+                    }
+                }
             }
+            GridSlashTransition {}
 
-            match repos() {
-                Some(Ok(page)) => {
-                    let total_repos = page.meta.total;
-                    let repos = page.items;
+            GridWrapper { padding: GridPadding::Sm,
+                section { class: "space-y-8 bg-primary-1",
+                    match repos() {
+                        Some(Ok(page)) => {
+                            let total_repos = page.meta.total;
+                            let repos = page.items;
 
                     let mut tag_map: BTreeMap<(String, String), usize> = BTreeMap::new();
                     for repo in &repos {
@@ -73,19 +91,26 @@ pub fn TagList() -> Element {
                         }
                     }
 
-                    rsx! {
-                        div { class: "text-sm text-secondary-5",
-                            "repos: {total_repos} | tags: {total_tags}"
-                        }
+                            rsx! {
+                                div { class: "flex items-center justify-between gap-3 border border-primary-6 bg-primary px-4 py-3",
+                                    div { class: "text-xs font-mono tracking-wide text-secondary-5",
+                                        "REPOS: "
+                                        span { class: "font-semibold text-secondary-3", "{total_repos}" }
+                                    }
+                                    div { class: "text-xs font-mono tracking-wide text-secondary-5",
+                                        "TAGS: "
+                                        span { class: "font-semibold text-secondary-3", "{total_tags}" }
+                                    }
+                                }
 
-                        div { class: "rounded-xl border border-primary-6 bg-primary-2 p-4 space-y-3",
-                            div { class: "text-sm font-medium text-secondary-4", "Tag filters" }
+                        div { class: "space-y-3 border border-dashed border-primary-6 bg-hatch p-4",
+                            div { class: "text-sm font-mono font-semibold tracking-wide text-secondary-4", "Tag filters" }
                             div { class: "flex flex-wrap gap-2",
                                 button {
                                     class: if selected.is_none() {
-                                        "rounded-md border border-primary-6 bg-primary-1 px-3 py-1 text-xs font-medium text-secondary-4"
+                                        "border border-secondary-2 bg-secondary-2 px-3 py-1 text-xs font-medium text-primary shadow-comic-sm"
                                     } else {
-                                        "rounded-md border border-primary-6 bg-primary-2 px-3 py-1 text-xs text-secondary-5 hover:bg-primary-1"
+                                        "border border-primary-6 bg-primary px-3 py-1 text-xs text-secondary-5 hover:bg-primary-1"
                                     },
                                     onclick: move |_| selected_tag.set(None),
                                     "All"
@@ -95,9 +120,9 @@ pub fn TagList() -> Element {
                                     button {
                                         key: "{tag.key}",
                                         class: if selected.as_ref() == Some(&tag.key) {
-                                            "rounded-md border border-primary-6 bg-primary-1 px-3 py-1 text-xs font-medium text-secondary-4"
+                                            "border border-secondary-2 bg-secondary-2 px-3 py-1 text-xs font-medium text-primary shadow-comic-sm"
                                         } else {
-                                            "rounded-md border border-primary-6 bg-primary-2 px-3 py-1 text-xs text-secondary-5 hover:bg-primary-1"
+                                            "border border-primary-6 bg-primary px-3 py-1 text-xs text-secondary-5 hover:bg-primary-1"
                                         },
                                         onclick: move |_| selected_tag.set(Some(tag.key.clone())),
                                         "{tag.label}:{tag.value} ({tag.count})"
@@ -107,22 +132,25 @@ pub fn TagList() -> Element {
                         }
 
                         if filtered_repos.is_empty() {
-                            div { class: "rounded-xl border border-primary-6 bg-primary-2 p-8 text-center text-sm text-secondary-5",
-                                "no repos for selected tag"
+                            div { class: "flex min-h-[320px] flex-col items-center justify-center border border-dashed border-primary-6 bg-primary text-center",
+                                span { class: "mb-3 font-mono text-sm tracking-widest text-secondary-5", "NO_DATA" }
+                                span { class: "text-sm text-secondary-5", "No repos for selected tag" }
                             }
                         } else {
                             div { class: "space-y-4",
                                 for repo in filtered_repos {
-                                    RepoRow { key: "{repo.id}", repo }
+                                    RepoManuscriptCard { key: "{repo.id}", repo }
                                 }
                             }
                         }
+                            }
+                        }
+                        Some(Err(e)) => rsx! {
+                            div { class: "border border-primary-error bg-primary p-4 text-sm text-primary-error", "{e}" }
+                        },
+                        None => rsx! { div { class: "text-sm text-secondary-5", "Loading..." } },
                     }
                 }
-                Some(Err(e)) => rsx! {
-                    div { class: "rounded-lg border border-primary-6 bg-primary-1 p-4 text-sm text-primary-error", "{e}" }
-                },
-                None => rsx! { div { class: "text-sm text-secondary-5", "Loading..." } },
             }
         }
     }

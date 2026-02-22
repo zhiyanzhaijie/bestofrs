@@ -38,6 +38,13 @@ export async function js_seed_theme(cookie_name, channel_name, seeded_key, chann
   }
 }
 
+export async function js_seed_grid_theme(cookie_name) {
+  const theme = read_cookie(cookie_name);
+  if (theme) {
+    document.documentElement.setAttribute("data-grid-theme", theme);
+  }
+}
+
 export async function js_is_dark_mode() {
   const theme = document.documentElement.getAttribute("data-theme");
   if (theme === "dark") {
@@ -91,4 +98,16 @@ export async function js_toggle_theme(cookie_name, channel_name, channel_key) {
   const current = document.documentElement.getAttribute("data-theme");
   const next = current === "dark" ? "light" : "dark";
   await js_set_theme(cookie_name, channel_name, channel_key, next);
+}
+
+export async function js_set_grid_theme(cookie_name, theme) {
+  if (!theme) {
+    document.documentElement.removeAttribute("data-grid-theme");
+    document.cookie = `${cookie_name}=; path=/; max-age=0; samesite=lax`;
+    return;
+  }
+  document.documentElement.setAttribute("data-grid-theme", theme);
+  if (read_cookie(cookie_name) !== theme) {
+    document.cookie = `${cookie_name}=${theme}; path=/; max-age=31536000; samesite=lax`;
+  }
 }

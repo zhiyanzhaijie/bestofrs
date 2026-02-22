@@ -6,3 +6,4 @@ pub mod pagination;
 pub mod select;
 pub mod skeleton;
 pub mod toast;
+pub mod dropdown_menu;

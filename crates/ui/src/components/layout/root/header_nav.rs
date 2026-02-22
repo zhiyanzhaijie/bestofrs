@@ -9,12 +9,12 @@ pub fn HeaderNav() -> Element {
     let show_admin = matches!(user_state(), UserState::User(me) if me.role == "Admin");
 
     rsx! {
-        nav { class: "flex items-center gap-4 text-sm",
-            Link { class: "text-secondary-5 hover:text-secondary-4 hover:underline", to: Route::HomeView {}, "Home" }
-            Link { class: "text-secondary-5 hover:text-secondary-4 hover:underline", to: Route::RepoListView {}, "Repo" }
-            Link { class: "text-secondary-5 hover:text-secondary-4 hover:underline", to: Route::TagListView {}, "Tag" }
+        nav { class: "flex items-center gap-2 text-sm",
+            Link { class: "border border-transparent px-3 py-1 font-mono text-xs tracking-wide text-secondary-5 transition-all hover:border-primary-6 hover:bg-primary-1 hover:text-secondary-3", to: Route::HomeView {}, "HOME" }
+            Link { class: "border border-transparent px-3 py-1 font-mono text-xs tracking-wide text-secondary-5 transition-all hover:border-primary-6 hover:bg-primary-1 hover:text-secondary-3", to: Route::RepoListView {}, "REPO" }
+            Link { class: "border border-transparent px-3 py-1 font-mono text-xs tracking-wide text-secondary-5 transition-all hover:border-primary-6 hover:bg-primary-1 hover:text-secondary-3", to: Route::TagListView {}, "TAGS" }
             if show_admin {
-                Link { class: "text-secondary-5 hover:text-secondary-4 hover:underline", to: Route::AdminView {}, "Admin" }
+                Link { class: "border border-transparent px-3 py-1 font-mono text-xs tracking-wide text-secondary-5 transition-all hover:border-primary-6 hover:bg-primary-1 hover:text-secondary-3", to: Route::AdminView {}, "ADMIN" }
             }
         }
     }

@@ -27,10 +27,11 @@ pub fn ProjectManagement() -> Element {
     let mut json_file_name = use_signal(String::new);
 
     rsx! {
-        section { class: "rounded-xl border border-primary-6 bg-primary-2 p-5 space-y-4",
+        section { class: "space-y-4 border border-secondary-2 bg-primary p-5 shadow-comic-sm",
             div { class: "space-y-1",
-                h2 { class: "text-lg font-semibold", "Project 管理" }
-                p { class: "text-sm text-secondary-5",
+                div { class: "font-mono text-xs font-semibold tracking-widest text-secondary-5", "PROJECTS / MANAGEMENT" }
+                h2 { class: "text-lg font-semibold tracking-tight text-secondary-3", "Project 管理" }
+                p { class: "border-l-2 border-primary-6 pl-3 text-sm text-secondary-5",
                     "列表查看 + 单条添加（底层复用 /api/projects/import）"
                 }
             }
@@ -63,7 +64,7 @@ pub fn ProjectManagement() -> Element {
                     }
                 }
 
-                div { class: "rounded-md border border-primary-6 bg-primary-1 p-4 space-y-2",
+                div { class: "border border-primary-6 bg-primary-1 p-4 space-y-2",
                     div { class: "text-sm font-medium", "通过 JSON 文件批量导入" }
                     div { class: "text-xs text-secondary-5",
                         "JSON 格式: [{{\"name\": \"xxx\", \"full_name\": \"owner/name\"}}, ...]"
@@ -219,7 +220,7 @@ pub fn ProjectManagement() -> Element {
                 }
             }
 
-            div { class: "pt-2 border-t border-primary-6 space-y-2",
+            div { class: "space-y-2 border-t border-dashed border-primary-6 pt-2",
                 div { class: "flex items-end justify-between",
                     h3 { class: "text-base font-semibold", "Projects 列表" }
                     match projects() {

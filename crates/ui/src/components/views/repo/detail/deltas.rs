@@ -22,7 +22,7 @@ pub fn DeltasSection(owner: String, name: String, refresh_tick: Signal<u32>) -> 
     })?;
 
     rsx! {
-        section { class: "rounded-xl border border-primary-6 bg-primary-2 p-5 space-y-4",
+        section { class: "space-y-4 border border-secondary-2 bg-primary p-5 shadow-comic-sm",
             h3 { class: "text-sm font-semibold text-secondary-4", "Daily deltas" }
             match deltas_fut() {
                 Some(Ok(page)) => {
@@ -46,7 +46,7 @@ pub fn DeltasSection(owner: String, name: String, refresh_tick: Signal<u32>) -> 
                             div { class: "text-sm text-secondary-5", "No delta data" }
                         } else {
                             div { class: "space-y-3",
-                                div { class: "rounded-md border border-primary-6 bg-primary-1 p-3",
+                                div { class: "border border-primary-6 bg-primary-1 p-3",
                                     ChartJsCanvas {
                                         chart_id: delta_chart_id,
                                         config: delta_config,

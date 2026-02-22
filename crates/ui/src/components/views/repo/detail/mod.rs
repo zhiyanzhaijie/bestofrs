@@ -6,8 +6,10 @@ mod snapshot;
 use dioxus::prelude::*;
 use dioxus_use_js::{JsValue, use_js};
 use serde_json::{Value, json};
-
-use crate::components::common::IOCell;
+use crate::components::common::{
+    GradientDirection, GridBackground, GridPadding, GridPattern, GridSlashTransition, GridType,
+    GridWrapper, IOCell,
+};
 use crate::IO::repos::get_repo;
 
 pub use deltas::DeltasSection;
@@ -38,54 +40,71 @@ fn RepoDetailPageContent(owner: String, name: String) -> Element {
     })?;
 
     rsx! {
-        div { class: "py-8 space-y-6",
-            div { class: "flex items-center justify-between gap-4",
-                div { class: "space-y-1 min-w-0",
-                    h1 { class: "text-2xl font-semibold tracking-tight truncate", "{owner}/{name}" }
-                    p { class: "text-sm text-secondary-5", "repo detail" }
-                }
+        div { class: "space-y-0",
+            GridWrapper {
+                grid_type: GridType::Default,
+                padding: GridPadding::Lg,
+                is_dot_on: true,
+                background: GridBackground {
+                    pattern: GridPattern::Dot,
+                    gradient: GradientDirection::ToBottom,
+                },
+                section { class: "relative overflow-hidden bg-primary",
+                    div { class: "relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between",
+                        div { class: "space-y-2 min-w-0",
+                            div { class: "font-mono text-xs font-semibold tracking-widest text-secondary-5", "REPOSITORY / DETAIL" }
+                            h1 { class: "truncate text-3xl font-bold tracking-tight text-secondary-2 md:text-5xl", "{owner}/{name}" }
+                            p { class: "text-sm text-secondary-5", "Snapshot trends, deltas and README." }
+                        }
 
-                div { class: "flex items-center gap-2",
-                    button {
-                        class: "text-sm text-secondary-5 hover:underline",
-                        onclick: move |_| navigator.go_back(),
-                        "返回"
+                        div { class: "flex items-center gap-2",
+                            button {
+                                class: "border border-primary-6 bg-primary-1 px-4 py-2 text-sm text-secondary-5 transition-all hover:-translate-y-0.5 hover:shadow-comic-sm",
+                                onclick: move |_| navigator.go_back(),
+                                "返回"
+                            }
+                            button {
+                                class: "border border-secondary-2 bg-secondary-2 px-4 py-2 text-sm font-medium text-primary transition-all hover:-translate-y-0.5 hover:shadow-comic-sm",
+                                onclick: move |_| refresh_tick.with_mut(|v| *v += 1),
+                                "刷新"
+                            }
+                        }
                     }
-                    button {
-                        class: "inline-flex items-center justify-center rounded-md border border-primary-6 bg-primary-1 px-3 py-2 text-sm text-secondary-5 hover:bg-primary-3 hover:text-secondary-4",
-                        onclick: move |_| refresh_tick.with_mut(|v| *v += 1),
-                        "刷新"
+                }
+            }
+            GridSlashTransition {}
+            GridWrapper { padding: GridPadding::Sm,
+                section { class: "space-y-8 bg-primary-1",
+
+                    RepoMetaSection {
+                        repo_fut,
+                        owner: owner.clone(),
+                        name: name.clone(),
                     }
-                }
-            }
 
-            RepoMetaSection {
-                repo_fut,
-                owner: owner.clone(),
-                name: name.clone(),
-            }
+                    IOCell {
+                        SnapshotSection {
+                            owner: owner.clone(),
+                            name: name.clone(),
+                            refresh_tick,
+                        }
+                    }
 
-            IOCell {
-                SnapshotSection {
-                    owner: owner.clone(),
-                    name: name.clone(),
-                    refresh_tick,
-                }
-            }
+                    IOCell {
+                        DeltasSection {
+                            owner: owner.clone(),
+                            name: name.clone(),
+                            refresh_tick,
+                        }
+                    }
 
-            IOCell {
-                DeltasSection {
-                    owner: owner.clone(),
-                    name: name.clone(),
-                    refresh_tick,
-                }
-            }
-
-            IOCell {
-                ReadmeSection {
-                    owner,
-                    name,
-                    refresh_tick,
+                    IOCell {
+                        ReadmeSection {
+                            owner,
+                            name,
+                            refresh_tick,
+                        }
+                    }
                 }
             }
         }

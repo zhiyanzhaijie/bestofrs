@@ -19,21 +19,21 @@ pub fn IngestDailySnapshotsControl() -> Element {
     })?;
 
     rsx! {
-        section { class: "rounded-xl border border-primary-6 bg-primary-2 p-5 space-y-4",
+        section { class: "space-y-4 border border-secondary-2 bg-primary p-5 shadow-comic-sm",
             div { class: "space-y-1",
-                h2 { class: "text-lg font-semibold", "Ingest Daily Snapshots" }
-                p { class: "text-sm text-secondary-5",
+                div { class: "font-mono text-xs font-semibold tracking-widest text-secondary-5", "JOBS / SNAPSHOT INGEST" }
+                h2 { class: "text-lg font-semibold tracking-tight text-secondary-3", "Ingest Daily Snapshots" }
+                p { class: "border-l-2 border-primary-6 pl-3 text-sm text-secondary-5",
                     "用于本地开发：手动触发一次 ingest（production 环境会返回 403）。"
                 }
             }
 
             button {
-                class: "inline-flex items-center justify-center rounded-md border border-primary-6 bg-primary-1 px-4 py-2 text-sm font-medium text-secondary-5 hover:bg-primary-3 hover:text-secondary-4",
+                class: "inline-flex items-center justify-center border border-secondary-2 bg-secondary-2 px-4 py-2 text-sm font-medium text-primary transition-all hover:-translate-y-0.5 hover:shadow-comic-sm",
                 onclick: move |_| run_nonce.with_mut(|v| *v += 1),
                 "Run once"
             }
-
-            div { class: "pt-2 border-t border-primary-6",
+            div { class: "pt-2 border-t border-dashed border-primary-6",
                 match run_result() {
                     Some(Ok(Some(res))) => rsx! {
                         div { class: "grid grid-cols-1 gap-2 text-sm",

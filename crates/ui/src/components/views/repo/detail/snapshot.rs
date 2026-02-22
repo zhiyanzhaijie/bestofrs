@@ -22,7 +22,7 @@ pub fn SnapshotSection(owner: String, name: String, refresh_tick: Signal<u32>) -
     })?;
 
     rsx! {
-        section { class: "rounded-xl border border-primary-6 bg-primary-2 p-5 space-y-5",
+        section { class: "space-y-5 border border-secondary-2 bg-primary p-5 shadow-comic-sm",
             div { class: "space-y-1",
                 h2 { class: "text-lg font-semibold", "Trend" }
                 p { class: "text-sm text-secondary-5", "Snapshots timeline" }
@@ -56,7 +56,7 @@ pub fn SnapshotSection(owner: String, name: String, refresh_tick: Signal<u32>) -
                             div { class: "text-sm text-secondary-5", "No snapshot data" }
                         } else {
                             div { class: "space-y-3",
-                                div { class: "rounded-md border border-primary-6 bg-primary-1 p-3",
+                                div { class: "border border-primary-6 bg-primary-1 p-3",
                                     ChartJsCanvas {
                                         chart_id: trend_chart_id,
                                         config: trend_config,
