@@ -46,7 +46,7 @@ pub fn RepoManuscriptCard(repo: RepoDto) -> Element {
 
     rsx! {
         article {
-            class: "group cursor-pointer border border-secondary-2 bg-primary shadow-comic transition-all duration-200 hover:-translate-y-0.5 hover:shadow-comic-hover",
+            class: "group cursor-pointer border border-primary-6 bg-primary shadow-comic transition-all duration-200 hover:-translate-y-0.5 hover:shadow-comic-hover",
             onclick: move |_| {
                 navigator.push(route.clone());
             },
@@ -55,7 +55,7 @@ pub fn RepoManuscriptCard(repo: RepoDto) -> Element {
                     div { class: "relative h-14 w-14 shrink-0",
                         div { class: "absolute left-1 top-1 h-14 w-14 border border-primary-6 bg-screentone" }
                         img {
-                            class: "relative z-10 h-14 w-14 border border-secondary-2 bg-primary object-cover grayscale contrast-125 transition-all group-hover:grayscale-0",
+                            class: "relative z-10 h-14 w-14 border border-primary-6 bg-primary object-cover grayscale contrast-125 transition-all group-hover:grayscale-0",
                             src: avatar_src,
                             alt: "{display_name} avatar",
                         }
@@ -97,9 +97,9 @@ pub fn RepoManuscriptCard(repo: RepoDto) -> Element {
                 }
             }
 
-            div { class: "mt-auto flex items-center justify-between border-t border-secondary-2 bg-hatch px-5 py-3 text-xs font-mono",
+            div { class: "mt-auto flex items-center justify-between border-t border-primary-6 bg-hatch px-5 py-3 text-xs font-mono",
                 div { class: "flex items-center gap-4",
-                    div { class: "flex items-center gap-1.5 border border-secondary-2 bg-primary px-2 py-0.5 shadow-comic-sm",
+                    div { class: "flex items-center gap-1.5 border border-primary-6 bg-primary px-2 py-0.5 shadow-comic-sm",
                         span { class: "font-bold", "★" }
                         span { class: "font-bold", "{stars}" }
                     }

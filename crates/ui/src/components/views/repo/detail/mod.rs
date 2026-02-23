@@ -49,7 +49,7 @@ fn RepoDetailPageContent(owner: String, name: String) -> Element {
                     pattern: GridPattern::Dot,
                     gradient: GradientDirection::ToBottom,
                 },
-                section { class: "relative overflow-hidden bg-primary",
+                section { class: "relative overflow-hidden",
                     div { class: "relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between",
                         div { class: "space-y-2 min-w-0",
                             div { class: "font-mono text-xs font-semibold tracking-widest text-secondary-5", "REPOSITORY / DETAIL" }

@@ -167,6 +167,31 @@ pub fn GridWrapper(
                                 fill: "url(#grid-pattern)",
                             }
                         }
+                    } else if matches!(background.pattern, GridPattern::Dot) {
+                        svg {
+                            class: "absolute inset-0 h-full w-full select-none text-[color:var(--grid-screentone-color)] opacity-35",
+                            defs {
+                                pattern {
+                                    id: "dot-pattern",
+                                    width: "12",
+                                    height: "12",
+                                    pattern_units: "userSpaceOnUse",
+                                    x: "0",
+                                    y: "0",
+                                    circle {
+                                        cx: "1",
+                                        cy: "1",
+                                        r: "1",
+                                        fill: "currentColor",
+                                    }
+                                }
+                            }
+                            rect {
+                                width: "100%",
+                                height: "100%",
+                                fill: "url(#dot-pattern)",
+                            }
+                        }
                     } else if let Some(background_class) = background_class {
                         div { class: "absolute inset-0 {background_class}" }
                     }

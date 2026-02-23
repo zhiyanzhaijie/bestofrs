@@ -15,7 +15,7 @@ pub fn Home() -> Element {
                     pattern: GridPattern::Dot,
                     gradient: GradientDirection::ToBottom,
                 },
-                section { class: "relative overflow-hidden bg-primary",
+                section { class: "relative overflow-hidden",
                     div { class: "relative z-10 space-y-6",
                         div { class: "inline-flex items-center gap-2 border border-primary-6 bg-primary-1 px-2 py-1 font-mono text-xs font-semibold tracking-wide text-secondary-5",
                             "MANIFEST / HOME"

@@ -4,6 +4,7 @@ use crate::components::common::{
     CommonPagination, GradientDirection, GridBackground, GridPadding, GridPattern,
     GridSlashTransition, GridType, GridWrapper, IOCell, RepoManuscriptCard,
 };
+use crate::components::button::{Button, ButtonVariant};
 use crate::components::select::{
     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
     SelectTrigger, SelectValue,
@@ -43,10 +44,14 @@ pub fn RepoList() -> Element {
                                 }
                             }
                             div { class: "flex flex-wrap items-center gap-3",
-                                button { class: "border border-primary-6 bg-primary-1 px-5 py-2.5 text-sm font-medium text-secondary-4 transition-all hover:-translate-y-0.5 hover:shadow-comic-sm",
+                                Button {
+                                    variant: ButtonVariant::Outline,
+                                    class: "px-5 py-2.5 text-sm",
                                     "Filter"
                                 }
-                                button { class: "border border-secondary-2 bg-secondary-2 px-5 py-2.5 text-sm font-medium text-primary transition-all hover:-translate-y-0.5 hover:shadow-comic-sm",
+                                Button {
+                                    variant: ButtonVariant::Primary,
+                                    class: "px-5 py-2.5 text-sm",
                                     "Sort: Popular"
                                 }
                             }

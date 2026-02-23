@@ -37,7 +37,7 @@ pub fn TagList() -> Element {
                     pattern: GridPattern::Dot,
                     gradient: GradientDirection::ToBottom,
                 },
-                section { class: "relative overflow-hidden bg-primary",
+                section { class: "relative overflow-hidden",
                     div { class: "relative z-10 space-y-3",
                         h1 { class: "text-4xl font-bold tracking-tight text-secondary-2", "Archives" }
                         p { class: "max-w-2xl text-sm leading-relaxed text-secondary-5",

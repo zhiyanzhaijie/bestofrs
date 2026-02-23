@@ -63,7 +63,7 @@ pub fn RootLayout() -> Element {
 
     rsx! {
         ToastProvider {
-            div { class: "min-h-screen overflow-x-hidden bg-primary-1 text-secondary-5",
+            div { class: "min-h-screen overflow-x-hidden bg-primary text-secondary-5",
                 ScrollProgress {}
                 div { class: "relative mx-auto flex min-h-screen w-[calc(100%-24px)] max-w-7xl flex-col shadow-[0_0_50px_rgba(0,0,0,0.02)] md:w-[calc(100%-64px)]",
                     header { class: "fixed top-0 left-0 right-0 z-50 mx-auto w-[calc(100%-24px)] max-w-7xl bg-transparent md:w-[calc(100%-64px)]",

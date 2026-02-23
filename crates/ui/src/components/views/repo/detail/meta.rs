@@ -5,7 +5,7 @@ use crate::types::repos::RepoDto;
 #[component]
 pub fn RepoMetaSection(repo_fut: Resource<Result<Option<RepoDto>, ServerFnError>>, owner: String, name: String) -> Element {
     rsx! {
-        section { class: "space-y-4 border border-secondary-2 bg-primary p-5 shadow-comic-sm",
+        section { class: "space-y-4 border border-primary-6 bg-primary p-5 shadow-comic-sm",
             h2 { class: "text-lg font-semibold tracking-tight text-secondary-3", "Meta" }
             match repo_fut() {
                 Some(Ok(Some(repo))) => {

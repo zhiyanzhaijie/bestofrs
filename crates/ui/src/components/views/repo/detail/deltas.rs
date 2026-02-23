@@ -22,7 +22,7 @@ pub fn DeltasSection(owner: String, name: String, refresh_tick: Signal<u32>) -> 
     })?;
 
     rsx! {
-        section { class: "space-y-4 border border-secondary-2 bg-primary p-5 shadow-comic-sm",
+        section { class: "space-y-4 border border-primary-6 bg-primary p-5 shadow-comic-sm",
             h3 { class: "text-sm font-semibold text-secondary-4", "Daily deltas" }
             match deltas_fut() {
                 Some(Ok(page)) => {

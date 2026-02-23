@@ -22,9 +22,7 @@
   --focused-border-color: var(--grid-accent);
   --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
   --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
-  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
-  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
-  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+  --secondary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 44%, #5d5d5d)) var(--light, color-mix(in oklab, var(--grid-accent) 52%, #d0d0d0));
 }
 
 :root[data-grid-theme="orange"] {
@@ -32,9 +30,7 @@
   --focused-border-color: var(--grid-accent);
   --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
   --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
-  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
-  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
-  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+  --secondary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 44%, #5d5d5d)) var(--light, color-mix(in oklab, var(--grid-accent) 52%, #d0d0d0));
 }
 
 :root[data-grid-theme="yellow"] {
@@ -42,9 +38,7 @@
   --focused-border-color: var(--grid-accent);
   --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
   --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
-  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
-  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
-  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+  --secondary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 44%, #5d5d5d)) var(--light, color-mix(in oklab, var(--grid-accent) 52%, #d0d0d0));
 }
 
 :root[data-grid-theme="green"] {
@@ -52,9 +46,7 @@
   --focused-border-color: var(--grid-accent);
   --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
   --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
-  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
-  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
-  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+  --secondary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 44%, #5d5d5d)) var(--light, color-mix(in oklab, var(--grid-accent) 52%, #d0d0d0));
 }
 
 :root[data-grid-theme="cyan"] {
@@ -62,9 +54,7 @@
   --focused-border-color: var(--grid-accent);
   --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
   --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
-  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
-  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
-  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+  --secondary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 44%, #5d5d5d)) var(--light, color-mix(in oklab, var(--grid-accent) 52%, #d0d0d0));
 }
 
 :root[data-grid-theme="blue"] {
@@ -72,9 +62,7 @@
   --focused-border-color: var(--grid-accent);
   --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
   --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
-  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
-  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
-  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+  --secondary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 44%, #5d5d5d)) var(--light, color-mix(in oklab, var(--grid-accent) 52%, #d0d0d0));
 }
 
 :root[data-grid-theme="purple"] {
@@ -82,9 +70,7 @@
   --focused-border-color: var(--grid-accent);
   --secondary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 48%, #e6e6e6)) var(--light, color-mix(in oklab, var(--grid-accent) 72%, #0d0d0d));
   --secondary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 56%, #fafafa)) var(--light, color-mix(in oklab, var(--grid-accent) 82%, #000000));
-  --primary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 18%, #232323)) var(--light, color-mix(in oklab, var(--grid-accent) 20%, #e5e5e5));
-  --primary-color-2: var(--dark, color-mix(in oklab, var(--grid-accent) 10%, #0a0a0a)) var(--light, color-mix(in oklab, var(--grid-accent) 8%, #ffffff));
-  --primary-color-1: var(--dark, color-mix(in oklab, var(--grid-accent) 6%, #0e0e0e)) var(--light, color-mix(in oklab, var(--grid-accent) 5%, #fbfbfb));
+  --secondary-color-6: var(--dark, color-mix(in oklab, var(--grid-accent) 44%, #5d5d5d)) var(--light, color-mix(in oklab, var(--grid-accent) 52%, #d0d0d0));
 }
 
 @theme inline {
