@@ -2,8 +2,6 @@ mod pagination;
 
 pub use pagination::*;
 
-mod repo_row;
-pub use repo_row::*;
 mod repo_manuscript_card;
 pub use repo_manuscript_card::RepoManuscriptCard;
 

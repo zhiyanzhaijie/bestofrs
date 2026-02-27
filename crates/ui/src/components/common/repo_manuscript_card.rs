@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use crate::components::icons::{ArrowRightIcon, GithubIcon, HouseIcon, StarIcon};
 use crate::components::ui::avatar::{Avatar, AvatarFallback, AvatarImage, AvatarImageSize};
 use crate::root::Route;
 use crate::types::repos::RepoDto;
@@ -9,6 +10,7 @@ pub fn RepoManuscriptCard(repo: RepoDto) -> Element {
         id,
         stars,
         forks,
+        description,
         full_name,
         homepage_url,
         avatar_url,
@@ -70,88 +72,93 @@ pub fn RepoManuscriptCard(repo: RepoDto) -> Element {
 
     rsx! {
         article {
-            class: "group cursor-pointer border border-primary-6 bg-primary shadow-comic transition-all duration-200 hover:-translate-y-0.5 hover:shadow-comic-hover",
+            class: "group relative flex min-h-[120px] cursor-pointer flex-col border border-primary-6 [box-shadow:4px_4px_0_0_color-mix(in_oklab,var(--primary-color-6)_70%,transparent)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-1 hover:[border-color:color-mix(in_oklab,var(--grid-accent)_78%,var(--secondary-color-2))] hover:[box-shadow:8px_8px_0_0_color-mix(in_oklab,var(--grid-accent)_72%,transparent)] md:flex-row",
             onclick: move |_| {
                 navigator.push(route.clone());
             },
-            div { class: "flex items-start justify-between gap-3 p-5 pb-2",
-                div { class: "flex min-w-0 items-start gap-4",
-                    div { class: "relative h-14 w-14 shrink-0",
-                        div { class: "absolute left-1 top-1 h-14 w-14 border border-primary-6 bg-screentone" }
-                        if let Some(src) = avatar_candidates.get(avatar_index()).cloned() {
-                            Avatar {
-                                key: "{src}",
-                                class: "relative z-10 h-14 w-14 border border-primary-6 bg-primary grayscale contrast-125 transition-all group-hover:grayscale-0",
-                                size: AvatarImageSize::Large,
-                                on_error: move |_| {
-                                    let next = avatar_index() + 1;
-                                    if next < avatar_candidates_for_error.len() {
-                                        avatar_index.set(next);
-                                    } else {
-                                        avatar_index.set(usize::MAX);
-                                    }
-                                },
-                                AvatarImage {
-                                    src: src,
-                                    alt: "{display_name} avatar",
+            div { class: "relative flex shrink-0 items-center gap-3 p-4 md:w-56",
+                div { class: "relative h-16 w-16 shrink-0",
+                    div { class: "absolute left-1 top-1 h-16 w-16 border border-primary-6 bg-screentone transition-all duration-200 group-hover:left-2 group-hover:top-2 group-hover:[border-color:color-mix(in_oklab,var(--grid-accent)_72%,var(--primary-color-6))] group-hover:[background-color:color-mix(in_oklab,var(--grid-accent)_18%,var(--primary-color))]" }
+                    if let Some(src) = avatar_candidates.get(avatar_index()).cloned() {
+                        Avatar {
+                            key: "{src}",
+                            class: "relative z-10 border border-primary-6 bg-primary grayscale contrast-125 transition-all group-hover:grayscale-0",
+                            size: AvatarImageSize::Large,
+                            on_error: move |_| {
+                                let next = avatar_index() + 1;
+                                if next < avatar_candidates_for_error.len() {
+                                    avatar_index.set(next);
+                                } else {
+                                    avatar_index.set(usize::MAX);
                                 }
-                                AvatarFallback { "{avatar_fallback}" }
+                            },
+                            AvatarImage {
+                                src: src,
+                                alt: "{display_name} avatar",
                             }
-                        } else {
-                            div { class: "relative z-10 flex h-14 w-14 items-center justify-center border border-primary-6 bg-primary-2 font-bold text-secondary-4",
-                                "{avatar_fallback}"
-                            }
+                            AvatarFallback { "{avatar_fallback}" }
+                        }
+                    } else {
+                        div { class: "relative z-10 flex h-16 w-16 items-center justify-center border border-primary-6 bg-primary-2 font-bold text-secondary-4",
+                            "{avatar_fallback}"
                         }
                     }
-                    div { class: "min-w-0",
-                        div { class: "mb-1 flex items-center gap-2",
-                            h3 { class: "truncate text-xl font-bold leading-tight text-secondary-2 transition-colors group-hover:text-secondary-6", "{name}" }
-                            span { class: "border border-primary-6 px-1 font-mono text-[10px] font-bold text-secondary-5", "#{id}" }
-                        }
-                        p { class: "truncate text-xs font-mono text-secondary-5", "@{owner}" }
+                }
+                div { class: "flex min-w-0 flex-1 flex-col justify-center gap-2 pl-2",
+                    div {
+                        h3 { class: "break-words text-base font-bold leading-tight text-secondary-6 transition-colors group-hover:text-secondary-2", "{name}" }
+                        p { class: "mt-0.5 text-[10px] font-mono text-secondary-5", "@{owner}" }
                     }
-                }
-                a {
-                    href: "{github_url}",
-                    class: "shrink-0 p-1 text-secondary-5 transition-colors hover:text-secondary-3",
-                    target: "_blank",
-                    onclick: move |evt| evt.stop_propagation(),
-                    "↗"
-                }
-            }
-
-            div { class: "space-y-2 px-5 py-2",
-                p { class: "line-clamp-1 border-l-2 border-primary-5 pl-3 text-sm leading-relaxed text-secondary-4",
-                    "Source: {github_url}"
-                }
-                if let Some(homepage) = homepage {
-                    p { class: "truncate text-xs text-secondary-5",
-                        "Site: "
-                        a { href: "{homepage}", class: "hover:underline", target: "_blank", onclick: move |evt| evt.stop_propagation(), "{homepage}" }
-                    }
-                }
-            }
-
-            div { class: "flex flex-wrap gap-2 px-5 py-3",
-                for tag in tags.iter().take(5) {
-                    span { class: "border border-primary-6 bg-primary-1 px-2 py-0.5 text-[10px] font-medium text-secondary-5 transition-colors group-hover:border-primary-7",
-                        "{tag.label}:{tag.value}"
+                    div { class: "relative z-20 flex items-center gap-2",
+                            a {
+                                href: "{github_url}",
+                                class: "text-secondary-5 transition-colors hover:text-secondary-3",
+                                target: "_blank",
+                                onclick: move |evt| evt.stop_propagation(),
+                                GithubIcon { width: 14, height: 14 }
+                            }
+                            if let Some(homepage) = homepage.clone() {
+                                a {
+                                    href: "{homepage}",
+                                    class: "text-secondary-5 transition-colors hover:text-secondary-3",
+                                    target: "_blank",
+                                    onclick: move |evt| evt.stop_propagation(),
+                                    HouseIcon { width: 14, height: 14 }
+                                }
+                            }
                     }
                 }
             }
-
-            div { class: "mt-auto flex items-center justify-between border-t border-primary-6 bg-hatch px-5 py-3 text-xs font-mono",
-                div { class: "flex items-center gap-4",
-                    div { class: "flex items-center gap-1.5 border border-primary-6 bg-primary px-2 py-0.5 shadow-comic-sm",
-                        span { class: "font-bold", "★" }
-                        span { class: "font-bold", "{stars}" }
+            div { class: "flex shrink-0 flex-row items-center justify-between gap-2 p-4 md:w-36 md:flex-col md:items-end",
+                div { class: "flex w-full flex-col items-end gap-1 text-xs font-mono text-secondary-5",
+                    div { class: "flex w-full items-center justify-end gap-2",
+                        span { class: "font-medium", "{stars}" }
+                        StarIcon { width: 12, height: 12, class: "text-secondary-4" }
                     }
-                    div { class: "flex items-center gap-1.5 text-secondary-5",
-                        span { "⑂" }
+                    div { class: "flex w-full items-center justify-end gap-2",
                         span { "{forks}" }
+                        span { class: "text-secondary-4", "⑂" }
+                    }
+                    div { class: "mt-0.5 flex w-full items-center justify-end gap-2 font-bold text-secondary-3",
+                        span { "VIEW" }
+                        ArrowRightIcon { width: 12, height: 12 }
                     }
                 }
-                span { class: "font-bold text-secondary-3", "VIEW →" }
+                div { class: "mt-auto w-full border-t border-primary-5 pt-2 text-right text-[10px] font-mono text-secondary-5",
+                    "{owner}"
+                }
+            }
+            div { class: "flex min-w-0 flex-grow flex-col justify-between p-4",
+                p { class: "mb-3 line-clamp-2 text-sm leading-relaxed text-secondary-4",
+                    "{description.clone().unwrap_or_else(|| \"No description\".to_string())}"
+                }
+                div { class: "flex flex-wrap justify-start gap-x-2 gap-y-2",
+                    for tag in tags.iter().take(6) {
+                        span { class: "border-b border-primary-5 pb-0.5 font-mono text-[10px] uppercase tracking-wider text-secondary-5 transition-colors group-hover:border-secondary-6 group-hover:text-secondary-6",
+                            "#{tag.label}-{tag.value}"
+                        }
+                    }
+                }
             }
         }
     }
