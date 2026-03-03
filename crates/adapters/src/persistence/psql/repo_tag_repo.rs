@@ -1,41 +1,18 @@
-use std::collections::HashMap;
 use app::app_error::AppResult;
 use app::common::pagination::{Page, Pagination};
-use app::repo::{RepoTagFacet, RepoTagListItem, RepoTagRepo, RepoTagTopRepo, UNTAG_LABEL, UNTAG_VALUE};
+use app::repo::{
+    build_avatar_urls, RepoTagFacet, RepoTagListItem, RepoTagRepo, RepoTagTopRepo, UNTAG_LABEL,
+    UNTAG_VALUE,
+};
 use async_trait::async_trait;
 use domain::{RepoId, Tag, TagLabel, TagValue};
 use sqlx::{Postgres, QueryBuilder};
+use std::collections::HashMap;
 
 use super::db_err;
 
 fn tag_id(label: &str, value: &str) -> String {
     format!("tag:{label}:{value}")
-}
-
-fn build_avatar_urls(repo_id: &str, avatar_url: Option<String>, homepage_url: Option<String>) -> Vec<String> {
-    let mut urls = Vec::new();
-    if let Some(homepage_url) = homepage_url {
-        let trimmed = homepage_url.trim().trim_end_matches('/');
-        if !trimmed.is_empty() {
-            urls.push(format!("{trimmed}/favicon.ico"));
-        }
-    }
-    if let Some(avatar_url) = avatar_url {
-        if !urls.contains(&avatar_url) {
-            urls.push(avatar_url);
-        }
-    }
-    if let Some((owner, _)) = repo_id.split_once('/') {
-        let owner_avatar = format!("https://github.com/{owner}.png");
-        if !urls.contains(&owner_avatar) {
-            urls.push(owner_avatar);
-        }
-    }
-    let fallback = "https://github.com/github.png".to_string();
-    if !urls.contains(&fallback) {
-        urls.push(fallback);
-    }
-    urls
 }
 
 #[derive(Debug, sqlx::FromRow)]
@@ -101,7 +78,7 @@ impl RepoTagRepo for PostgresRepoTagRepo {
         }
 
         let mut tag_builder: QueryBuilder<Postgres> =
-            QueryBuilder::new("INSERT INTO tags (id, label, value, display_name) ");
+            QueryBuilder::new("INSERT INTO tags (id, label, value, description) ");
         tag_builder.push_values(tags, |mut b, tag| {
             let id = tag_id(tag.label.as_str(), tag.value.as_str());
             b.push_bind(id)
@@ -110,7 +87,7 @@ impl RepoTagRepo for PostgresRepoTagRepo {
                 .push_bind(tag.description.clone());
         });
         tag_builder
-            .push(" ON CONFLICT(id) DO UPDATE SET label = excluded.label, value = excluded.value, display_name = excluded.display_name");
+            .push(" ON CONFLICT(id) DO UPDATE SET label = excluded.label, value = excluded.value, description = excluded.description");
         tag_builder
             .build()
             .execute(&mut *tx)
@@ -138,8 +115,8 @@ impl RepoTagRepo for PostgresRepoTagRepo {
     async fn upsert_tag(&self, tag: &Tag) -> AppResult<()> {
         let id = tag_id(tag.label.as_str(), tag.value.as_str());
         sqlx::query(
-            "INSERT INTO tags (id, label, value, display_name) VALUES ($1, $2, $3, $4) \
-             ON CONFLICT(id) DO UPDATE SET label = excluded.label, value = excluded.value, display_name = excluded.display_name",
+            "INSERT INTO tags (id, label, value, description) VALUES ($1, $2, $3, $4) \
+             ON CONFLICT(id) DO UPDATE SET label = excluded.label, value = excluded.value, description = excluded.description",
         )
         .bind(id)
         .bind(tag.label.as_str())
@@ -153,7 +130,7 @@ impl RepoTagRepo for PostgresRepoTagRepo {
 
     async fn update_tag(&self, tag: &Tag) -> AppResult<()> {
         let id = tag_id(tag.label.as_str(), tag.value.as_str());
-        sqlx::query("UPDATE tags SET display_name = $1 WHERE id = $2")
+        sqlx::query("UPDATE tags SET description = $1 WHERE id = $2")
             .bind(tag.description.clone())
             .bind(id)
             .execute(&self.pool)
@@ -303,7 +280,7 @@ impl RepoTagRepo for PostgresRepoTagRepo {
 
         let rows: Vec<(String, String, Option<String>)> = sqlx::query_as(
             r#"
-            SELECT label, value, display_name
+            SELECT label, value, description
             FROM tags
             WHERE NOT (LOWER(label) = LOWER($1) AND LOWER(value) = LOWER($2))
             ORDER BY label, value
@@ -347,7 +324,7 @@ impl RepoTagRepo for PostgresRepoTagRepo {
 
         let tag_rows: Vec<TagRow> = sqlx::query_as(
             r#"
-            SELECT id, label, value, display_name AS description
+            SELECT id, label, value, description
             FROM tags
             WHERE NOT (LOWER(label) = LOWER($1) AND LOWER(value) = LOWER($2))
             ORDER BY label, value
@@ -405,7 +382,9 @@ impl RepoTagRepo for PostgresRepoTagRepo {
                 first = false;
                 builder.push_bind(row.id.clone());
             }
-            builder.push(") ) SELECT tag_id, repo_id, avatar_url, homepage_url FROM ranked WHERE rn <= ");
+            builder.push(
+                ") ) SELECT tag_id, repo_id, avatar_url, homepage_url FROM ranked WHERE rn <= ",
+            );
             builder.push_bind(top_n as i64);
             builder.push(" ORDER BY tag_id, rn");
             let rows: Vec<TagTopRepoRow> = builder
@@ -420,8 +399,8 @@ impl RepoTagRepo for PostgresRepoTagRepo {
                     .push(RepoTagTopRepo {
                         avatar_urls: build_avatar_urls(
                             &row.repo_id,
-                            row.avatar_url,
-                            row.homepage_url,
+                            row.avatar_url.as_deref(),
+                            row.homepage_url.as_deref(),
                         ),
                         repo_id: row.repo_id,
                     });
@@ -461,7 +440,7 @@ impl RepoTagRepo for PostgresRepoTagRepo {
 
         let rows: Vec<(String, String, Option<String>)> = sqlx::query_as(
             r#"
-            SELECT label, value, display_name
+            SELECT label, value, description
             FROM tags
             WHERE (label ILIKE $1 OR value ILIKE $1)
               AND NOT (LOWER(label) = LOWER($2) AND LOWER(value) = LOWER($3))
@@ -562,5 +541,4 @@ impl RepoTagRepo for PostgresRepoTagRepo {
             })
             .collect())
     }
-
 }

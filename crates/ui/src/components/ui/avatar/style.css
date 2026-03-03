@@ -45,6 +45,10 @@
   height: 4rem;
   font-size: 1.75rem;
 }
+.avatar-custom {
+  width: unset;
+  height: unset;
+}
 .avatar[data-state="loading"] {
   animation: pulse 1.5s infinite ease-in-out;
 }

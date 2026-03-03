@@ -4,13 +4,11 @@ mod snapshot;
 
 use crate::components::common::{
     GradientDirection, GridBackground, GridPadding, GridPattern, GridSlashTransition, GridType,
-    GridWrapper, IOCell,
+    GridWrapper, IOCell, RepoAvatar,
 };
-use crate::components::icons::{
-    GithubIcon, HouseIcon, StarIcon, TagsIcon, UsersRoundIcon,
-};
+use crate::components::icons::{GithubIcon, HouseIcon, StarIcon, TagsIcon, UsersRoundIcon};
 use crate::components::tabs::{TabContent, TabList, TabTrigger, Tabs};
-use crate::components::ui::avatar::{Avatar, AvatarFallback, AvatarImage, AvatarImageSize};
+use crate::components::ui::avatar::AvatarImageSize;
 use crate::IO::repos::get_repo;
 use dioxus::prelude::*;
 use dioxus_use_js::{use_js, JsValue};
@@ -51,25 +49,10 @@ fn RepoDetailPageContent(owner: String, name: String) -> Element {
 
     let github_url = format!("https://github.com/{owner}/{name}");
     let homepage_url = repo_data.as_ref().and_then(|r| r.homepage_url.clone());
-    let stored_avatar_url = repo_data.as_ref().and_then(|r| r.avatar_url.clone());
-    let owner_avatar_url = format!("https://github.com/{owner}.png");
-    let favicon_url = homepage_url
+    let avatar_candidates = repo_data
         .as_ref()
-        .map(|url| format!("{}/favicon.ico", url.trim_end_matches('/')));
-    let mut avatar_candidates = Vec::<String>::new();
-    if let Some(url) = favicon_url {
-        avatar_candidates.push(url);
-    }
-    if let Some(url) = stored_avatar_url {
-        if !avatar_candidates.contains(&url) {
-            avatar_candidates.push(url);
-        }
-    }
-    if !avatar_candidates.contains(&owner_avatar_url) {
-        avatar_candidates.push(owner_avatar_url.clone());
-    }
-    let avatar_candidates_for_error = avatar_candidates.clone();
-    let mut avatar_index = use_signal(|| 0usize);
+        .map(|repo| repo.avatar_urls.clone())
+        .unwrap_or_default();
 
     rsx! {
         div { class: "space-y-0",
@@ -101,30 +84,13 @@ fn RepoDetailPageContent(owner: String, name: String) -> Element {
                         div { class: "flex min-w-0 flex-1 items-start gap-6",
                             // Avatar
                             div { class: "hidden md:block relative h-24 w-24 shrink-0",
-                                div { class: "absolute left-1 top-1 h-24 w-24 border border-primary-6 bg-screentone" }
-                                if let Some(src) = avatar_candidates.get(avatar_index()).cloned() {
-                                    Avatar {
-                                        key: "{src}",
-                                        class: "relative z-10 h-24 w-24 border border-primary-6 bg-primary",
-                                        size: AvatarImageSize::Large,
-                                        on_error: move |_| {
-                                            let next = avatar_index() + 1;
-                                            if next < avatar_candidates_for_error.len() {
-                                                avatar_index.set(next);
-                                            } else {
-                                                avatar_index.set(usize::MAX);
-                                            }
-                                        },
-                                        AvatarImage {
-                                            src: src,
-                                            alt: "{name} avatar",
-                                        }
-                                        AvatarFallback { "{owner.chars().next().unwrap_or('?')}" }
-                                    }
-                                } else {
-                                    div { class: "relative z-10 flex h-24 w-24 items-center justify-center border border-primary-6 bg-primary-2 text-2xl font-bold text-secondary-4",
-                                        "{owner.chars().next().unwrap_or('?')}"
-                                    }
+                                div { class: "absolute left-2 top-2 h-24 w-24 border border-primary-6 bg-screentone" }
+                                RepoAvatar {
+                                    repo_id: format!("{owner}/{name}"),
+                                    avatar_urls: avatar_candidates.clone(),
+                                    size: AvatarImageSize::Custom,
+                                    class: "relative z-10 h-24 w-24 border border-primary-6 bg-primary",
+                                    fallback_class: "relative z-10 flex h-24 w-24 items-center justify-center border border-primary-6 bg-primary-2 text-2xl font-bold text-secondary-4",
                                 }
                             }
 

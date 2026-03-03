@@ -1,9 +1,9 @@
-use dioxus::prelude::*;
-use crate::components::common::{build_repo_avatar_urls, RepoAvatar};
+use crate::components::common::RepoAvatar;
 use crate::components::icons::{ArrowRightIcon, GithubIcon, HouseIcon, StarIcon};
 use crate::components::ui::avatar::AvatarImageSize;
 use crate::root::Route;
 use crate::types::repos::RepoDto;
+use dioxus::prelude::*;
 
 #[component]
 pub fn RepoManuscriptCard(repo: RepoDto) -> Element {
@@ -14,7 +14,7 @@ pub fn RepoManuscriptCard(repo: RepoDto) -> Element {
         description,
         full_name,
         homepage_url,
-        avatar_url,
+        avatar_urls,
         tags,
         ..
     } = repo;
@@ -28,7 +28,6 @@ pub fn RepoManuscriptCard(repo: RepoDto) -> Element {
         format!("https://github.com/{owner}/{name}")
     };
     let homepage = homepage_url.as_deref().and_then(normalize_url);
-    let avatar_candidates = build_repo_avatar_urls(&id, avatar_url, homepage.clone());
 
     let route = if owner.is_empty() {
         Route::HomeView {}
@@ -50,10 +49,10 @@ pub fn RepoManuscriptCard(repo: RepoDto) -> Element {
                     div { class: "absolute left-1 top-1 h-16 w-16 border border-primary-6 bg-screentone transition-all duration-200 group-hover:left-2 group-hover:top-2 group-hover:[border-color:color-mix(in_oklab,var(--grid-accent)_72%,var(--primary-color-6))] group-hover:[background-color:color-mix(in_oklab,var(--grid-accent)_18%,var(--primary-color))]" }
                     RepoAvatar {
                         repo_id: id.clone(),
-                        avatar_urls: avatar_candidates,
-                        class: "relative z-10 border border-primary-6 bg-primary grayscale contrast-125 transition-all group-hover:grayscale-0".to_string(),
-                        fallback_class: "relative z-10 flex h-16 w-16 items-center justify-center border border-primary-6 bg-primary-2 font-bold text-secondary-4".to_string(),
+                        avatar_urls: avatar_urls.clone(),
                         size: AvatarImageSize::Large,
+                        class: "relative z-10 h-16 w-16 border border-primary-6 bg-primary grayscale contrast-125 transition-all group-hover:grayscale-0",
+                        fallback_class: "relative z-10 flex h-16 w-16 items-center justify-center border border-primary-6 bg-primary-2 font-bold text-secondary-4",
                     }
                 }
                 div { class: "flex min-w-0 flex-1 flex-col justify-center gap-2 pl-2",
@@ -107,7 +106,7 @@ pub fn RepoManuscriptCard(repo: RepoDto) -> Element {
                 div { class: "flex flex-wrap justify-start gap-x-2 gap-y-2",
                     for tag in tags.iter().take(6) {
                         span { class: "border-b border-primary-5 pb-0.5 font-mono text-[10px] uppercase tracking-wider text-secondary-5 transition-colors group-hover:border-secondary-6 group-hover:text-secondary-6",
-                            "#{tag.label}-{tag.value}"
+                            "#{tag.label}"
                         }
                     }
                 }

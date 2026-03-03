@@ -2,36 +2,6 @@ use dioxus::prelude::*;
 
 use crate::components::ui::avatar::{Avatar, AvatarFallback, AvatarImage, AvatarImageSize};
 
-pub fn build_repo_avatar_urls(
-    repo_id: &str,
-    avatar_url: Option<String>,
-    homepage_url: Option<String>,
-) -> Vec<String> {
-    let mut urls = Vec::new();
-    if let Some(homepage_url) = homepage_url {
-        let trimmed = homepage_url.trim().trim_end_matches('/');
-        if !trimmed.is_empty() {
-            urls.push(format!("{trimmed}/favicon.ico"));
-        }
-    }
-    if let Some(avatar_url) = avatar_url {
-        if !urls.contains(&avatar_url) {
-            urls.push(avatar_url);
-        }
-    }
-    if let Some((owner, _)) = repo_id.split_once('/') {
-        let owner_avatar = format!("https://github.com/{owner}.png");
-        if !urls.contains(&owner_avatar) {
-            urls.push(owner_avatar);
-        }
-    }
-    let fallback = "https://github.com/github.png".to_string();
-    if !urls.contains(&fallback) {
-        urls.push(fallback);
-    }
-    urls
-}
-
 #[derive(Props, Clone, PartialEq)]
 pub struct RepoAvatarProps {
     pub repo_id: String,
@@ -46,43 +16,86 @@ pub struct RepoAvatarProps {
 
 #[component]
 pub fn RepoAvatar(props: RepoAvatarProps) -> Element {
-    let avatar_urls_for_error = props.avatar_urls.clone();
+    let avatar_candidates = props.avatar_urls.iter().fold(Vec::new(), |mut acc, url| {
+        let url = url.trim().to_string();
+        if !url.is_empty() && !acc.contains(&url) {
+            acc.push(url);
+        }
+        acc
+    });
+    let avatar_candidates_for_error = avatar_candidates.clone();
     let mut avatar_index = use_signal(|| 0usize);
-    let avatar_fallback = props
+    let mut remount_flip = use_signal(|| false);
+    let fallback_owner = props
         .repo_id
-        .split('/')
-        .nth(1)
-        .unwrap_or(props.repo_id.as_str())
-        .chars()
-        .next()
-        .map(|c| c.to_ascii_uppercase().to_string())
-        .unwrap_or_else(|| "?".to_string());
+        .split_once('/')
+        .map(|(owner, _)| owner)
+        .unwrap_or(props.repo_id.as_str());
+    let fallback_char = fallback_owner.chars().next().unwrap_or('?');
+    use_effect(use_reactive(
+        (&props.repo_id, &props.avatar_urls),
+        move |_| {
+            avatar_index.set(0);
+        },
+    ));
+    let current_index = avatar_index();
 
-    if let Some(src) = props.avatar_urls.get(avatar_index()).cloned() {
+    if let Some(src) = avatar_candidates.get(current_index).cloned() {
         rsx! {
-            Avatar {
-                key: "{src}",
-                class: "{props.class}",
-                size: props.size,
-                on_error: move |_| {
-                    let next = avatar_index() + 1;
-                    if next < avatar_urls_for_error.len() {
-                        avatar_index.set(next);
-                    } else {
-                        avatar_index.set(usize::MAX);
+            if remount_flip() {
+                section { class: "contents", key: "{props.repo_id}:{current_index}:{src}:1",
+                    Avatar {
+                        class: "{props.class}",
+                        size: props.size,
+                        on_error: move |_| {
+                            let next = avatar_index() + 1;
+                            if next < avatar_candidates_for_error.len() {
+                                avatar_index.set(next);
+                                remount_flip.set(!remount_flip());
+                            } else {
+                                avatar_index.set(usize::MAX);
+                            }
+                        },
+                        AvatarImage {
+                            src: src.clone(),
+                            alt: "{props.repo_id} avatar",
+                        }
+                        AvatarFallback {
+                            class: "{props.fallback_class}",
+                            "{fallback_char}"
+                        }
                     }
-                },
-                AvatarImage {
-                    src: src,
-                    alt: "{props.repo_id} avatar",
                 }
-                AvatarFallback { "{avatar_fallback}" }
+            } else {
+                div { class: "contents", key: "{props.repo_id}:{current_index}:{src}:0",
+                    Avatar {
+                        class: "{props.class}",
+                        size: props.size,
+                        on_error: move |_| {
+                            let next = avatar_index() + 1;
+                            if next < avatar_candidates_for_error.len() {
+                                avatar_index.set(next);
+                                remount_flip.set(!remount_flip());
+                            } else {
+                                avatar_index.set(usize::MAX);
+                            }
+                        },
+                        AvatarImage {
+                            src: src,
+                            alt: "{props.repo_id} avatar",
+                        }
+                        AvatarFallback {
+                            class: "{props.fallback_class}",
+                            "{fallback_char}"
+                        }
+                    }
+                }
             }
         }
     } else {
         rsx! {
             div { class: "{props.fallback_class}",
-                "{avatar_fallback}"
+                "{fallback_char}"
             }
         }
     }

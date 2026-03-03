@@ -7,14 +7,16 @@ pub enum AvatarImageSize {
     Small,
     Medium,
     Large,
+    Custom,
 }
 
 impl AvatarImageSize {
     fn to_class(self) -> &'static str {
         match self {
-            AvatarImageSize::Small => "avatar-sm",
-            AvatarImageSize::Medium => "avatar-md",
-            AvatarImageSize::Large => "avatar-lg",
+            Self::Small => "avatar-sm",
+            Self::Medium => "avatar-md",
+            Self::Large => "avatar-lg",
+            Self::Custom => "avatar-custom",
         }
     }
 }

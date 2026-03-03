@@ -1,12 +1,12 @@
 use app::prelude::Pagination;
 use dioxus::prelude::*;
 
+use crate::types::search::{SearchRepoDto, SearchResultDto};
+use crate::types::tags::{TagDto, TagListItemDto};
 use crate::IO::repos::{
     bulk_update_repo_tag, create_tag, delete_tag, get_repo, list_tags_with_meta, replace_repo_tags,
     search_repos, update_tag,
 };
-use crate::types::search::{SearchRepoDto, SearchResultDto};
-use crate::types::tags::{TagDto, TagListItemDto};
 
 fn empty_search_result(page: Pagination) -> SearchResultDto {
     SearchResultDto {

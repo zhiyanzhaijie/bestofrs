@@ -106,6 +106,7 @@ pub fn TagList() -> Element {
                                                             for repo in tag.top_repos {
                                                                 if let Some((owner, name)) = parse_owner_name(&repo.repo_id) {
                                                                     Link {
+                                                                        key: "{repo.repo_id}",
                                                                         class: "flex items-center gap-2 border border-primary-6 bg-primary-1 px-2 py-1 hover:bg-primary-3",
                                                                         to: Route::RepoDetailView { owner, name },
                                                                         div { class: "h-6 w-6 shrink-0",
@@ -120,7 +121,7 @@ pub fn TagList() -> Element {
                                                                         span { class: "text-xs text-secondary-4", "{repo.repo_id}" }
                                                                     }
                                                                 } else {
-                                                                    div { class: "flex items-center gap-2 border border-primary-6 bg-primary-1 px-2 py-1",
+                                                                    div { key: "{repo.repo_id}", class: "flex items-center gap-2 border border-primary-6 bg-primary-1 px-2 py-1",
                                                                         div { class: "h-6 w-6 shrink-0",
                                                                             RepoAvatar {
                                                                                 repo_id: repo.repo_id.clone(),
