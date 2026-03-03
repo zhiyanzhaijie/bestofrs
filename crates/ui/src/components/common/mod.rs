@@ -24,3 +24,6 @@ pub use grid_wrapper::{
 
 mod grid_slash_transition;
 pub use grid_slash_transition::GridSlashTransition;
+
+mod typing_text;
+pub use typing_text::TypingText;
