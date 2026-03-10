@@ -1,4 +1,4 @@
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::slice::from_ref;
 use std::sync::Arc;
 
@@ -7,7 +7,8 @@ use domain::{Repo, RepoId, RepoWithTags, Tag};
 use crate::app_error::AppResult;
 use crate::common::{Page, Pagination};
 use crate::repo::{
-    GithubGateway, RepoRepo, RepoSearchCache, RepoTagFacet, RepoTagListItem, RepoTagRepo,
+    GithubGateway, RepoRankQuery, RepoRepo, RepoSearchCache, RepoTagFacet, RepoTagListItem,
+    RepoTagRepo,
 };
 
 #[derive(Debug, Clone)]
@@ -73,8 +74,136 @@ impl RepoQueryHandler {
         Ok(Some(RepoWithTags { repo, tags }))
     }
 
-    pub async fn list_with_tags(&self, page: Pagination) -> AppResult<Page<RepoWithTags>> {
-        let repos_page = self.repos.list(page).await?;
+    pub async fn list_with_tags(
+        &self,
+        page: Pagination,
+        active_tag_values: Option<Vec<String>>,
+    ) -> AppResult<Page<RepoWithTags>> {
+        let mut dedup = BTreeSet::new();
+        let mut normalized_values = Vec::new();
+        for value in active_tag_values.unwrap_or_default() {
+            let value = value.trim();
+            if value.is_empty() {
+                continue;
+            }
+            if dedup.insert(value.to_string()) {
+                normalized_values.push(value.to_string());
+            }
+        }
+
+        let repos_page = if normalized_values.is_empty() {
+            self.repos.list(page).await?
+        } else {
+            let tags = self.repo_tags.find_tags_by_values(&normalized_values).await?;
+            let mut tags_by_value = HashMap::new();
+            for tag in tags {
+                tags_by_value.insert(tag.value.as_str().to_string(), tag);
+            }
+
+            if normalized_values
+                .iter()
+                .any(|value| !tags_by_value.contains_key(value))
+            {
+                Page {
+                    items: Vec::new(),
+                    meta: page.meta(0),
+                }
+            } else {
+                let mut matched_repo_ids: Option<HashSet<String>> = None;
+                for value in &normalized_values {
+                    let Some(tag) = tags_by_value.get(value) else {
+                        return Ok(Page {
+                            items: Vec::new(),
+                            meta: page.meta(0),
+                        });
+                    };
+
+                    let mut current_repo_ids = HashSet::new();
+                    let mut offset = 0u32;
+                    loop {
+                        let ids_page = self
+                            .repo_tags
+                            .list_repo_ids_by_label(
+                                tag.label.as_str(),
+                                Some(tag.value.as_str()),
+                                Pagination {
+                                    limit: Some(Pagination::MAX_LIMIT),
+                                    offset: Some(offset),
+                                },
+                            )
+                            .await?;
+                        for repo_id in ids_page.items {
+                            current_repo_ids.insert(repo_id.as_str().to_string());
+                        }
+                        offset = offset.saturating_add(Pagination::MAX_LIMIT);
+                        if offset as u64 >= ids_page.meta.total {
+                            break;
+                        }
+                    }
+
+                    matched_repo_ids = match matched_repo_ids {
+                        Some(mut existing) => {
+                            existing.retain(|repo_id| current_repo_ids.contains(repo_id));
+                            Some(existing)
+                        }
+                        None => Some(current_repo_ids),
+                    };
+                }
+
+                let mut matched_repo_ids = matched_repo_ids
+                    .unwrap_or_default()
+                    .into_iter()
+                    .collect::<Vec<_>>();
+                matched_repo_ids.sort();
+                let total = matched_repo_ids.len() as u64;
+
+                let offset = page.offset() as usize;
+                let limit = page.limit() as usize;
+                let page_repo_ids = matched_repo_ids
+                    .into_iter()
+                    .skip(offset)
+                    .take(limit)
+                    .map(RepoId::new_unchecked)
+                    .collect::<Vec<_>>();
+
+                let mut repos = Vec::with_capacity(page_repo_ids.len());
+                for repo_id in &page_repo_ids {
+                    if let Some(repo) = self.repos.get(repo_id).await? {
+                        repos.push(repo);
+                    }
+                }
+
+                Page {
+                    items: repos,
+                    meta: page.meta(total),
+                }
+            }
+        };
+        let repo_ids: Vec<RepoId> = repos_page
+            .items
+            .iter()
+            .map(|repo| repo.id.clone())
+            .collect();
+        let pairs = self.repo_tags.list_by_repo_ids(&repo_ids).await?;
+        let mut tags_by_repo: HashMap<RepoId, Vec<Tag>> = HashMap::new();
+        for (repo_id, tag) in pairs {
+            tags_by_repo.entry(repo_id).or_default().push(tag);
+        }
+        Ok(repos_page.map(|repo| {
+            let tags = match tags_by_repo.remove(&repo.id) {
+                Some(tags) => tags,
+                None => Vec::new(),
+            };
+            RepoWithTags { repo, tags }
+        }))
+    }
+
+    pub async fn list_ranked_with_tags(
+        &self,
+        query: RepoRankQuery,
+        page: Pagination,
+    ) -> AppResult<Page<RepoWithTags>> {
+        let repos_page = self.repos.list_ranked(query, page).await?;
         let repo_ids: Vec<RepoId> = repos_page
             .items
             .iter()

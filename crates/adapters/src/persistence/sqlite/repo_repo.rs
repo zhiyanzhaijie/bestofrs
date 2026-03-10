@@ -1,8 +1,9 @@
 use super::db_err;
 use app::app_error::AppResult;
 use app::common::pagination::{Page, Pagination};
-use app::repo::RepoRepo;
+use app::repo::{RepoRankMetric, RepoRankQuery, RepoRankTimeRange, RepoRepo};
 use async_trait::async_trait;
+use chrono::Duration;
 use domain::{Repo, RepoId};
 use sqlx::{QueryBuilder, Sqlite};
 
@@ -242,6 +243,118 @@ impl RepoRepo for SqliteRepoRepo {
         .fetch_all(&self.pool)
         .await
         .map_err(db_err)?;
+        let items = rows.into_iter().map(Into::into).collect();
+        Ok(page.to_page(items, total as u64))
+    }
+
+    async fn list_ranked(&self, query: RepoRankQuery, page: Pagination) -> AppResult<Page<Repo>> {
+        let limit = page.limit();
+        let offset = page.offset();
+        let total: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM repos")
+            .fetch_one(&self.pool)
+            .await
+            .map_err(db_err)?;
+
+        if query.metric == RepoRankMetric::Recent {
+            let rows: Vec<RepoDb> = sqlx::query_as(
+                r#"
+                SELECT
+                  id, github_repo_id, full_name, description,
+                  homepage_url, avatar_url,
+                  stars, forks, open_issues, watchers,
+                  last_fetched_at, etag
+                FROM repos
+                ORDER BY last_fetched_at DESC, stars DESC
+                LIMIT ? OFFSET ?
+                "#,
+            )
+            .bind(limit as i64)
+            .bind(offset as i64)
+            .fetch_all(&self.pool)
+            .await
+            .map_err(db_err)?;
+            let items = rows.into_iter().map(Into::into).collect();
+            return Ok(page.to_page(items, total as u64));
+        }
+
+        let anchor_date: Option<chrono::NaiveDate> =
+            sqlx::query_scalar("SELECT MAX(snapshot_date) FROM snapshot_deltas")
+                .fetch_one(&self.pool)
+                .await
+                .map_err(db_err)?;
+
+        let rows: Vec<RepoDb> = if let Some(anchor_date) = anchor_date {
+            let window_days = match query.range {
+                RepoRankTimeRange::Daily => 1,
+                RepoRankTimeRange::Weekly => 7,
+                RepoRankTimeRange::Monthly => 30,
+            };
+            let range_start = anchor_date - Duration::days((window_days - 1) as i64);
+            let order_expr = match query.metric {
+                RepoRankMetric::Star => "stars",
+                RepoRankMetric::Fork => "forks",
+                RepoRankMetric::Issue => "open_issues",
+                RepoRankMetric::Recent => "r.last_fetched_at",
+            };
+            let sql = format!(
+                r#"
+                SELECT
+                  r.id, r.github_repo_id, r.full_name, r.description,
+                  r.homepage_url, r.avatar_url,
+                  COALESCE(SUM(d.stars_delta), 0) AS stars,
+                  COALESCE(SUM(d.forks_delta), 0) AS forks,
+                  ABS(COALESCE(SUM(d.open_issues_delta), 0)) AS open_issues,
+                  r.watchers,
+                  r.last_fetched_at, r.etag
+                FROM repos r
+                LEFT JOIN snapshot_deltas d
+                  ON d.repo_id = r.id
+                 AND d.snapshot_date >= ?
+                 AND d.snapshot_date <= ?
+                GROUP BY
+                  r.id, r.github_repo_id, r.full_name, r.description,
+                  r.homepage_url, r.avatar_url,
+                  r.watchers,
+                  r.last_fetched_at, r.etag
+                ORDER BY {order_expr} DESC, r.stars DESC
+                LIMIT ? OFFSET ?
+                "#
+            );
+            sqlx::query_as(&sql)
+                .bind(range_start)
+                .bind(anchor_date)
+                .bind(limit as i64)
+                .bind(offset as i64)
+                .fetch_all(&self.pool)
+                .await
+                .map_err(db_err)?
+        } else {
+            let fallback_order = match query.metric {
+                RepoRankMetric::Star => "stars",
+                RepoRankMetric::Fork => "forks",
+                RepoRankMetric::Issue => "open_issues",
+                RepoRankMetric::Recent => "last_fetched_at",
+            };
+            let sql = format!(
+                r#"
+                SELECT
+                  id, github_repo_id, full_name, description,
+                  homepage_url, avatar_url,
+                  0 AS stars, 0 AS forks, 0 AS open_issues, watchers,
+                  last_fetched_at, etag
+                FROM repos
+                ORDER BY {fallback_order} DESC, stars DESC
+                LIMIT ? OFFSET ?
+                "#
+            );
+            sqlx::query_as(&sql)
+                .bind(limit as i64)
+                .bind(offset as i64)
+                .fetch_all(&self.pool)
+                .await
+                .map_err(db_err)?
+        };
+
         let items = rows.into_iter().map(Into::into).collect();
         Ok(page.to_page(items, total as u64))
     }

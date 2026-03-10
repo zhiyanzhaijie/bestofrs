@@ -1,10 +1,39 @@
 use async_trait::async_trait;
 use domain::{Repo, RepoId, Tag};
+use serde::{Deserialize, Serialize};
 
 use crate::app_error::AppResult;
 
 use crate::common::pagination::{Page, Pagination};
 use crate::repo::RepoSearchResult;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum RepoRankMetric {
+    Star,
+    Fork,
+    Issue,
+    Recent,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum RepoRankTimeRange {
+    Daily,
+    Weekly,
+    Monthly,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RepoRankQuery {
+    pub metric: RepoRankMetric,
+    pub range: RepoRankTimeRange,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RepoListQuery {
+    pub page: Pagination,
+    pub metric: Option<RepoRankMetric>,
+    pub range: Option<RepoRankTimeRange>,
+    pub tags: Option<Vec<String>>,
+}
 
 #[async_trait]
 pub trait RepoRepo: Send + Sync {
@@ -13,6 +42,7 @@ pub trait RepoRepo: Send + Sync {
     async fn get(&self, id: &RepoId) -> AppResult<Option<Repo>>;
     async fn find_existing_ids(&self, ids: &[RepoId]) -> AppResult<Vec<RepoId>>;
     async fn list(&self, page: Pagination) -> AppResult<Page<Repo>>;
+    async fn list_ranked(&self, query: RepoRankQuery, page: Pagination) -> AppResult<Page<Repo>>;
     async fn search_by_key(&self, key: &str, page: Pagination) -> AppResult<Page<Repo>>;
 }
 
