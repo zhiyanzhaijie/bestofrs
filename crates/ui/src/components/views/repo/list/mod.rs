@@ -9,14 +9,47 @@ use crate::components::select::{
     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
     SelectTrigger, SelectValue,
 };
+
+use crate::components::skeleton::Skeleton;
+use crate::types::repos::RepoDto;
 use crate::IO::repos::{list_repo_tag_facets, list_repos_with_query};
 use app::prelude::Pagination as PageQuery;
 use app::repo::{RepoListQuery, RepoRankMetric, RepoRankTimeRange};
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+struct RepoListMemory {
+    list_key: Option<String>,
+    anchor_id: Option<String>,
+}
+
+fn repo_anchor_id_for_list(repo_id: &str) -> String {
+    let normalized = repo_id
+        .chars()
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() || ch == '-' || ch == '_' {
+                ch
+            } else {
+                '-'
+            }
+        })
+        .collect::<String>();
+    format!("repo-{normalized}")
+}
+
+static REPO_LIST_MEMORY: GlobalSignal<RepoListMemory> = Signal::global(RepoListMemory::default);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum RepoListHeroType {
     AllProjects,
     SearchResult,
+}
+
+#[derive(Clone, PartialEq, Eq)]
+struct RepoListCachedPage {
+    items: Vec<RepoDto>,
+    total_pages: u32,
+    current_page: u32,
+    hero_type: RepoListHeroType,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -52,6 +85,168 @@ impl ListSummary {
     }
 }
 
+fn normalize_page_size(size: u32) -> u32 {
+    match size {
+        20 | 50 | 100 => size,
+        _ => 50,
+    }
+}
+
+fn repo_list_route_from_ctx(ctx: RepoListContext, page: u32, size: u32) -> crate::root::Route {
+    let (metric_q, range_q) = query_params_from_filter_sort((ctx.filter_type)(), (ctx.sort_type)());
+    crate::root::Route::RepoListView {
+        tags: active_tags_to_query(&(ctx.active_tags)()),
+        metric: metric_q,
+        range: range_q,
+        page: Some(page.max(1)),
+        size: Some(normalize_page_size(size)),
+    }
+}
+
+fn repo_list_memory_key(ctx: RepoListContext) -> String {
+    format!(
+        "{}|{:?}|{:?}|{}|{}",
+        active_tags_to_query(&(ctx.active_tags)()).unwrap_or_default(),
+        (ctx.filter_type)(),
+        (ctx.sort_type)(),
+        (ctx.current_page)(),
+        (ctx.page_size)()
+    )
+}
+
+#[component]
+fn RepoListCachedFallback() -> Element {
+    let ctx = use_context::<RepoListContext>();
+    if let Some(cached) = (ctx.last_success)() {
+        rsx! {
+            RepoListContent {
+                items: cached.items,
+                total_pages: cached.total_pages,
+                current_page: cached.current_page,
+                hero_type: cached.hero_type,
+            }
+        }
+    } else {
+        rsx! {
+            Skeleton { class: "skeleton w-full h-full min-h-[220px] rounded-xl border border-primary-6" }
+        }
+    }
+}
+
+#[component]
+fn RepoListContent(
+    items: Vec<RepoDto>,
+    total_pages: u32,
+    current_page: u32,
+    hero_type: RepoListHeroType,
+) -> Element {
+    let mut ctx = use_context::<RepoListContext>();
+    let navigator = use_navigator();
+    let list_key = repo_list_memory_key(ctx);
+    let memory = REPO_LIST_MEMORY.peek().clone();
+    let restore_anchor = if memory.list_key.as_deref() == Some(list_key.as_str()) {
+        memory.anchor_id.clone()
+    } else {
+        None
+    };
+    let rendered_items = items
+        .into_iter()
+        .map(|repo| {
+            let card_anchor = repo_anchor_id_for_list(&repo.id);
+            let should_restore = restore_anchor.as_deref() == Some(card_anchor.as_str());
+            (repo, should_restore)
+        })
+        .collect::<Vec<_>>();
+    let restore_anchor_for_effect = restore_anchor.clone();
+    let mut restore_target = use_signal(|| None::<MountedEvent>);
+    let mut restored = use_signal(|| false);
+
+    use_effect(move || {
+        if restored() {
+            return;
+        }
+        if let Some(mounted) = restore_target() {
+            restored.set(true);
+            if restore_anchor_for_effect.is_some() {
+                *REPO_LIST_MEMORY.write() = RepoListMemory::default();
+            }
+            spawn(async move {
+                let _ = mounted.scroll_to(ScrollBehavior::Instant).await;
+            });
+        }
+    });
+    rsx! {
+        div { class: "space-y-8",
+            if rendered_items.is_empty() {
+                div { class: "flex min-h-[320px] flex-col items-center justify-center border border-dashed border-primary-6 bg-primary text-center",
+                    span { class: "mb-3 font-mono text-sm tracking-widest text-secondary-5",
+                        "NO_DATA"
+                    }
+                    if hero_type == RepoListHeroType::AllProjects {
+                        span { class: "text-sm text-secondary-5", "No repos found" }
+                    } else {
+                        span { class: "text-sm text-secondary-5",
+                            "No repos for selected tag set"
+                        }
+                    }
+                }
+            } else {
+                div { class: "space-y-4",
+                    for (r, should_restore) in rendered_items {
+                        if should_restore && !restored() {
+                            div {
+                                key: "{r.id}",
+                                style: "scroll-margin-top: clamp(5rem, 34vh, 20rem);",
+                                onmounted: move |evt| {
+                                    restore_target.set(Some(evt.clone()));
+                                },
+                                RepoManuscriptCard {
+                                    repo: r,
+                                    on_open: {
+                                        let list_key = list_key.clone();
+                                        move |anchor_id: String| {
+                                            *REPO_LIST_MEMORY.write() = RepoListMemory {
+                                                list_key: Some(list_key.clone()),
+                                                anchor_id: Some(anchor_id),
+                                            };
+                                        }
+                                    },
+                                }
+                            }
+                        } else {
+                            RepoManuscriptCard {
+                                key: "{r.id}",
+                                repo: r,
+                                on_open: {
+                                    let list_key = list_key.clone();
+                                    move |anchor_id: String| {
+                                        *REPO_LIST_MEMORY.write() = RepoListMemory {
+                                            list_key: Some(list_key.clone()),
+                                            anchor_id: Some(anchor_id),
+                                        };
+                                    }
+                                },
+                            }
+                        }
+                    }
+                }
+            }
+            if total_pages > 1 {
+                div { class: "pt-2",
+                    CommonPagination {
+                        current_page,
+                        total_pages,
+                        on_page_change: move |p| {
+                            ctx.current_page.set(p);
+                            navigator.replace(repo_list_route_from_ctx(ctx, p, (ctx.page_size)()));
+                        },
+                    }
+                }
+            }
+        }
+    }
+}
+
 #[derive(Clone, PartialEq, Eq)]
 struct TagAdviceItem {
     key: String,
@@ -66,6 +261,7 @@ struct RepoListContext {
     page_size: Signal<u32>,
     current_page: Signal<u32>,
     summary: Signal<ListSummary>,
+    last_success: Signal<Option<RepoListCachedPage>>,
 }
 
 fn parse_tags_query(tags: Option<&str>) -> Vec<String> {
@@ -204,15 +400,21 @@ fn remove_tag_query(active_tags: &[String], remove: &str) -> Option<String> {
     }
 }
 
-
 #[component]
-pub fn RepoList(tags: Option<String>, metric: Option<String>, range: Option<String>) -> Element {
+pub fn RepoList(
+    tags: Option<String>,
+    metric: Option<String>,
+    range: Option<String>,
+    page: Option<u32>,
+    size: Option<u32>,
+) -> Element {
     let active_tags = use_signal(|| parse_tags_query(tags.as_deref()));
     let filter_type = use_signal(|| parse_filter_type(range.as_deref(), metric.as_deref()));
     let sort_type = use_signal(|| parse_sort_type(metric.as_deref()));
-    let page_size = use_signal(|| 50u32);
-    let current_page = use_signal(|| 1u32);
+    let page_size = use_signal(|| normalize_page_size(size.unwrap_or(50)));
+    let current_page = use_signal(|| page.unwrap_or(1).max(1));
     let summary = use_signal(ListSummary::empty);
+    let last_success = use_signal(|| None::<RepoListCachedPage>);
 
     use_context_provider(|| RepoListContext {
         active_tags,
@@ -221,19 +423,11 @@ pub fn RepoList(tags: Option<String>, metric: Option<String>, range: Option<Stri
         page_size,
         current_page,
         summary,
+        last_success,
     });
 
-    let route_key = format!(
-        "{}|{}|{}|{:?}|{:?}",
-        tags.clone().unwrap_or_default(),
-        metric.clone().unwrap_or_default(),
-        range.clone().unwrap_or_default(),
-        filter_type(),
-        sort_type()
-    );
-
     rsx! {
-        div { class: "space-y-0",
+        div { class: "min-h-screen grid grid-rows-[auto_auto_minmax(0,1fr)]",
             GridWrapper {
                 grid_type: GridType::Default,
                 padding: GridPadding::Sm,
@@ -246,16 +440,19 @@ pub fn RepoList(tags: Option<String>, metric: Option<String>, range: Option<Stri
                     div { class: "relative z-10 flex flex-col gap-2",
                         RepoMeta {}
                         div { class: "flex flex-col gap-6 pt-6",
-                            RepoListTags { key: "{route_key}" }
+                            IOCell {
+                                RepoListTags {}
+                            }
                             RepoListHandler {}
                         }
                     }
                 }
             }
             GridSlashTransition {}
-            GridWrapper { padding: GridPadding::Sm,
-                section { class: "space-y-6 bg-primary-1",
-                    IOCell { RepoListIO {} }
+            GridWrapper { class: "min-h-0 h-full", padding: GridPadding::Sm,
+                IOCell {
+                    loading_fallback: rsx! { RepoListCachedFallback {} },
+                    RepoListIO {}
                 }
             }
         }
@@ -331,6 +528,8 @@ fn RepoListTags() -> Element {
                                                     tags: next_tags,
                                                     metric: metric_q,
                                                     range: range_q,
+                                                    page: Some(1),
+                                                    size: Some((ctx.page_size)()),
                                                 });
                                         }
                                     },
@@ -359,6 +558,8 @@ fn RepoListTags() -> Element {
                                                     tags: Some(query),
                                                     metric: metric_q,
                                                     range: range_q,
+                                                    page: Some(1),
+                                                    size: Some((ctx.page_size)()),
                                                 });
                                         }
                                     },
@@ -398,16 +599,8 @@ fn RepoListHandler() -> Element {
                         if let Some(next_filter) = next {
                             ctx.filter_type.set(next_filter);
                             ctx.current_page.set(1);
-                            let (metric_q, range_q) = query_params_from_filter_sort(
-                                next_filter,
-                                (ctx.sort_type)(),
-                            );
                             navigator
-                                .push(crate::root::Route::RepoListView {
-                                    tags: active_tags_to_query(&(ctx.active_tags)()),
-                                    metric: metric_q,
-                                    range: range_q,
-                                });
+                                .push(repo_list_route_from_ctx(ctx, 1, (ctx.page_size)()));
                         }
                     },
                     SelectTrigger {
@@ -454,8 +647,10 @@ fn RepoListHandler() -> Element {
                     placeholder: "page size",
                     on_value_change: move |v: Option<u32>| {
                         if let Some(v) = v {
-                            ctx.page_size.set(v);
+                            let next_size = normalize_page_size(v);
+                            ctx.page_size.set(next_size);
                             ctx.current_page.set(1);
+                            navigator.replace(repo_list_route_from_ctx(ctx, 1, next_size));
                         }
                     },
                     SelectTrigger {
@@ -500,21 +695,8 @@ fn RepoListHandler() -> Element {
                                 ctx.filter_type.set(FilterType::Total);
                             }
                             ctx.current_page.set(1);
-                            let current_filter = if next_sort == SortType::AddTime {
-                                FilterType::Total
-                            } else {
-                                (ctx.filter_type)()
-                            };
-                            let (metric_q, range_q) = query_params_from_filter_sort(
-                                current_filter,
-                                next_sort,
-                            );
                             navigator
-                                .push(crate::root::Route::RepoListView {
-                                    tags: active_tags_to_query(&(ctx.active_tags)()),
-                                    metric: metric_q,
-                                    range: range_q,
-                                });
+                                .push(repo_list_route_from_ctx(ctx, 1, (ctx.page_size)()));
                         }
                     },
                     SelectTrigger { aria_label: "Select sort", style: "min-width: 10rem;", SelectValue {} }
@@ -615,38 +797,22 @@ fn RepoListIO() -> Element {
                 ctx.summary.set(next_summary);
             }
             let total_pages = meta.total_pages;
+            let cached_page = RepoListCachedPage {
+                items: items.clone(),
+                total_pages,
+                current_page: (ctx.current_page)(),
+                hero_type,
+            };
+            if (ctx.last_success)().as_ref() != Some(&cached_page) {
+                ctx.last_success.set(Some(cached_page));
+            }
 
             rsx! {
-                div { class: "space-y-8",
-                    if items.is_empty() {
-                        div { class: "flex min-h-[320px] flex-col items-center justify-center border border-dashed border-primary-6 bg-primary text-center",
-                            span { class: "mb-3 font-mono text-sm tracking-widest text-secondary-5",
-                                "NO_DATA"
-                            }
-                            if hero_type == RepoListHeroType::AllProjects {
-                                span { class: "text-sm text-secondary-5", "No repos found" }
-                            } else {
-                                span { class: "text-sm text-secondary-5",
-                                    "No repos for selected tag set"
-                                }
-                            }
-                        }
-                    } else {
-                        div { class: "space-y-4",
-                            for r in items {
-                                RepoManuscriptCard { key: "{r.id}", repo: r }
-                            }
-                        }
-                    }
-                    if total_pages > 1 {
-                        div { class: "pt-2",
-                            CommonPagination {
-                                current_page: (ctx.current_page)(),
-                                total_pages,
-                                on_page_change: move |p| ctx.current_page.set(p),
-                            }
-                        }
-                    }
+                RepoListContent {
+                    items,
+                    total_pages,
+                    current_page: (ctx.current_page)(),
+                    hero_type,
                 }
             }
         }
@@ -654,17 +820,13 @@ fn RepoListIO() -> Element {
             if (ctx.summary)() != ListSummary::empty() {
                 ctx.summary.set(ListSummary::empty());
             }
+            ctx.last_success.set(None);
             rsx! {
                 div { class: "rounded-lg border border-primary-6 bg-primary-1 p-4 text-sm text-primary-error",
                     "{e}"
                 }
             }
         }
-        None => {
-            if (ctx.summary)() != ListSummary::empty() {
-                ctx.summary.set(ListSummary::empty());
-            }
-            rsx! {}
-        }
+        None => rsx! { RepoListCachedFallback {} },
     }
 }

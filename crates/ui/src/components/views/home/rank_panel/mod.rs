@@ -118,6 +118,8 @@ pub(super) fn HomeRankPanel() -> Element {
                             tags: None,
                             metric: Some(rank_metric_query(active_tab()).to_string()),
                             range: Some(rank_range_query(time_range()).to_string()),
+                            page: None,
+                            size: None,
                         },
                         class: "relative group",
                         div { class: "absolute inset-0 rounded-full bg-primary-1 border-2 border-primary-6 translate-x-[10px] translate-y-[10px] transition-all duration-300 group-hover:border-focused-border" }

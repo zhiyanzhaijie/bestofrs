@@ -6,13 +6,15 @@ use crate::types::repos::RepoDto;
 use dioxus::prelude::*;
 
 #[component]
-pub fn RepoManuscriptCard(repo: RepoDto) -> Element {
+pub fn RepoManuscriptCard(
+    repo: RepoDto,
+    on_open: Option<EventHandler<String>>,
+) -> Element {
     let RepoDto {
         id,
         stars,
         forks,
         description,
-        full_name,
         homepage_url,
         avatar_urls,
         tags,
@@ -21,7 +23,6 @@ pub fn RepoManuscriptCard(repo: RepoDto) -> Element {
 
     let navigator = use_navigator();
     let (owner, name) = id.split_once('/').unwrap_or(("", &id));
-    let display_name = full_name.as_deref().unwrap_or(&id);
     let github_url = if owner.is_empty() {
         format!("https://github.com/{id}")
     } else {
@@ -37,12 +38,17 @@ pub fn RepoManuscriptCard(repo: RepoDto) -> Element {
             name: name.to_string(),
         }
     };
+    let anchor_id = repo_anchor_id(&id);
 
     rsx! {
         article {
+            id: "{anchor_id}",
             class: "group relative flex min-h-[120px] cursor-pointer flex-col border border-primary-6 [box-shadow:4px_4px_0_0_color-mix(in_oklab,var(--primary-color-6)_70%,transparent)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-1 hover:[border-color:color-mix(in_oklab,var(--grid-accent)_78%,var(--secondary-color-2))] hover:[box-shadow:8px_8px_0_0_color-mix(in_oklab,var(--grid-accent)_72%,transparent)] md:flex-row",
             onclick: move |_| {
                 navigator.push(route.clone());
+                if let Some(on_open) = on_open.as_ref() {
+                    on_open.call(anchor_id.clone());
+                }
             },
             div { class: "relative flex shrink-0 items-center gap-3 p-4 md:w-56",
                 div { class: "relative h-16 w-16 shrink-0",
@@ -122,3 +128,18 @@ fn normalize_url(value: &str) -> Option<String> {
     }
     Some(trimmed.to_string())
 }
+
+fn repo_anchor_id(repo_id: &str) -> String {
+    let normalized = repo_id
+        .chars()
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() || ch == '-' || ch == '_' {
+                ch
+            } else {
+                '-'
+            }
+        })
+        .collect::<String>();
+    format!("repo-{normalized}")
+}
+

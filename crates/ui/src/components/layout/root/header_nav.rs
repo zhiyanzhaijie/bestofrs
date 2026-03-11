@@ -17,6 +17,8 @@ pub fn HeaderNav() -> Element {
                     tags: None,
                     metric: None,
                     range: None,
+                    page: None,
+                    size: None,
                 },
                 "REPO"
             }

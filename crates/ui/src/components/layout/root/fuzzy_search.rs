@@ -49,6 +49,8 @@ pub fn FuzzySearch() -> Element {
             tags: Some(value),
             metric: None,
             range: None,
+            page: None,
+            size: None,
         });
     };
     let page = Pagination {

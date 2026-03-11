@@ -80,8 +80,8 @@ pub fn TagRow(
                                 div { class: "h-px flex-grow border-t border-dashed border-primary-6" }
                             }
                             div { class: "flex flex-1 flex-wrap content-center items-center justify-start gap-2",
-                                for repo in tag.top_repos.into_iter().take(10) {
-                                    MiniRepoCard { key: "{repo.repo_id}", repo }
+                                for (repo_idx, repo) in tag.top_repos.into_iter().take(10).enumerate() {
+                                    MiniRepoCard { key: "{repo.repo_id}:{repo_idx}", repo }
                                 }
                             }
                         }
@@ -92,6 +92,8 @@ pub fn TagRow(
                                 tags: Some(tag.value.clone()),
                                 metric: None,
                                 range: None,
+                                page: None,
+                                size: None,
                             },
                             "OPEN"
                         }

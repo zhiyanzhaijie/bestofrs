@@ -97,9 +97,7 @@ pub fn UserLayout() -> Element {
                 SuspenseBoundary {
                     fallback: move |_: SuspenseContext| {
                         rsx! {
-                            div { class: "py-8 min-h-[60vh]",
-                                Skeleton { class: "skeleton h-full min-h-[420px] w-full rounded-xl border border-primary-6" }
-                            }
+                            Skeleton { class: "skeleton h-[calc(100svh-4rem)] w-full" }
                         }
                     },
                     Outlet::<Route> {}

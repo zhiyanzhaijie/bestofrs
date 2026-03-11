@@ -44,6 +44,8 @@ pub fn Footer() -> Element {
                                     tags: None,
                                     metric: None,
                                     range: None,
+                                    page: None,
+                                    size: None,
                                 },
                                 "Repo"
                             }

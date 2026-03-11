@@ -55,6 +55,8 @@ pub fn Home() -> Element {
                                     tags: None,
                                     metric: None,
                                     range: None,
+                                    page: None,
+                                    size: None,
                                 },
                                 class: "group flex items-center gap-4 text-sm font-mono font-bold uppercase tracking-[0.3em] text-secondary-2 hover:text-secondary-6 transition-colors",
                                 "Access Archive"
