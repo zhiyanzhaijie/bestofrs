@@ -35,16 +35,6 @@ pub(crate) fn MetaSection() -> Element {
 
     rsx! {
         section { class: "relative min-h-80 overflow-hidden",
-            div { class: "relative z-10 flex items-center justify-start pb-4",
-                div { class: "flex items-center gap-2",
-                    button {
-                        class: "border border-primary-6 bg-primary-1 px-4 py-2 text-sm text-secondary-5 transition-all hover:-translate-y-0.5 hover:shadow-comic-sm",
-                        onclick: move |_| navigator.go_back(),
-                        "返回"
-                    }
-                }
-            }
-
             div { class: "relative z-10 flex h-full flex-col gap-6 md:flex-row md:items-stretch md:justify-between",
                 div { class: "flex min-w-0 flex-1 items-start gap-6",
                     div { class: "hidden md:block relative h-24 w-24 shrink-0",

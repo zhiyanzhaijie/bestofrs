@@ -1,6 +1,8 @@
 mod pagination;
 
 pub use pagination::*;
+mod breadcrumb;
+pub use breadcrumb::*;
 
 mod repo_manuscript_card;
 pub use repo_manuscript_card::RepoManuscriptCard;

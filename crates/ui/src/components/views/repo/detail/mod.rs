@@ -5,8 +5,8 @@ mod readme_section;
 mod snapshot_section;
 
 use crate::components::common::{
-    GradientDirection, GridBackground, GridPadding, GridPattern, GridSlashTransition, GridType,
-    GridWrapper, IOCell,
+    CommonBreadcrumb, GradientDirection, GridBackground, GridPadding, GridPattern,
+    GridSlashTransition, GridType, GridWrapper, IOCell,
 };
 use crate::components::tabs::{TabContent, TabList, TabTrigger, Tabs};
 
@@ -18,13 +18,13 @@ use meta_section::MetaSection;
 use readme_section::skeleton::ReadmeSectionSkeleton;
 use snapshot_section::skeleton::SnapshotSectionSkeleton;
 
-use deltas_section::DeltasSection;
-use readme_section::ReadmeSection;
-use snapshot_section::SnapshotSection;
 use chart::{
     build_delta_chart_config, build_trend_chart_config, chart_dom_id, short_date_label,
     ChartJsCanvas,
 };
+use deltas_section::DeltasSection;
+use readme_section::ReadmeSection;
+use snapshot_section::SnapshotSection;
 
 #[derive(Clone, Copy)]
 pub(super) struct RepoDetailContext {
@@ -40,6 +40,11 @@ pub fn RepoDetail(owner: ReadSignal<String>, name: ReadSignal<String>) -> Elemen
 
     rsx! {
         div { class: "space-y-0",
+            GridWrapper {
+                is_dot_on: true,
+                padding: GridPadding::Sm,
+                CommonBreadcrumb {  }
+            }
             GridWrapper {
                 grid_type: GridType::Default,
                 padding: GridPadding::Lg,

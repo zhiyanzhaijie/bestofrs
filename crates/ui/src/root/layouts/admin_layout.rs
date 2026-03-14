@@ -1,14 +1,15 @@
 use dioxus::prelude::*;
 
-use crate::components::AdminStateHint;
+use crate::components::avatar::{Avatar, AvatarFallback, AvatarImage, AvatarImageSize};
+use crate::components::common::CommonBreadcrumb;
 use crate::components::icons::{ArrowLeftIcon, ScrollTextIcon, TagsIcon};
 use crate::components::separator::Separator;
-use crate::components::avatar::{Avatar, AvatarFallback, AvatarImage, AvatarImageSize};
 use crate::components::sidebar::{
     Sidebar, SidebarCollapsible, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel,
     SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuButtonSize,
     SidebarMenuItem, SidebarProvider, SidebarRail, SidebarTrigger, SidebarVariant,
 };
+use crate::components::AdminStateHint;
 use crate::root::layouts::{UserContext, UserState};
 use crate::root::Route;
 
@@ -178,6 +179,7 @@ pub fn AdminLayout() -> Element {
                                 }
                             }
                         }
+                        CommonBreadcrumb {  }
                         div { class: "min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6",
                             SuspenseBoundary {
                                 fallback: move |_: SuspenseContext| {
