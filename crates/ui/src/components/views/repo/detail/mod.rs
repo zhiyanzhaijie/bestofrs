@@ -5,7 +5,7 @@ mod readme_section;
 mod snapshot_section;
 
 use crate::components::common::{
-    CommonBreadcrumb, GradientDirection, GridBackground, GridPadding, GridPattern,
+    CommonBreadcrumb, GradientDirection, GridBackground, GridLineType, GridPadding, GridPattern,
     GridSlashTransition, GridType, GridWrapper, IOCell,
 };
 use crate::components::tabs::{TabContent, TabList, TabTrigger, Tabs};
@@ -46,8 +46,7 @@ pub fn RepoDetail(owner: ReadSignal<String>, name: ReadSignal<String>) -> Elemen
                 CommonBreadcrumb {  }
             }
             GridWrapper {
-                grid_type: GridType::Default,
-                padding: GridPadding::Lg,
+                padding: GridPadding::None,
                 is_dot_on: true,
                 background: GridBackground {
                     pattern: GridPattern::Dot,

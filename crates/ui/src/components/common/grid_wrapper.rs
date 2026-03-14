@@ -24,6 +24,7 @@ impl GridPadding {
 pub enum GridType {
     #[default]
     Default,
+    Inner,
     End,
 }
 #[derive(Clone, Copy, PartialEq, Eq, Default)]
@@ -204,21 +205,34 @@ pub fn GridWrapper(
                 }
             }
             if matches!(line_type, GridLineType::Solid) {
-                    div { class: "pointer-events-none absolute inset-y-0 left-0 z-10", style: "border-left:1px solid var(--grid-line-color);" }
-                    div { class: "pointer-events-none absolute inset-y-0 right-0 z-10", style: "border-right:1px solid var(--grid-line-color);" }
-                    if matches!(grid_type, GridType::Default) {
-                        div { class: "pointer-events-none absolute bottom-0 left-1/2 z-10 w-screen -translate-x-1/2", style: "border-bottom:1px solid var(--grid-line-color);" }
-                    }
-                } else if matches!(line_type, GridLineType::Dashed) {
-                    div { class: "pointer-events-none absolute inset-y-0 left-0 z-10", style: "border-left:1px dashed var(--grid-line-color);" }
-                    div { class: "pointer-events-none absolute inset-y-0 right-0 z-10", style: "border-right:1px dashed var(--grid-line-color);" }
-                    if matches!(grid_type, GridType::Default) {
-                        div { class: "pointer-events-none absolute bottom-0 left-1/2 z-10 w-screen -translate-x-1/2", style: "border-bottom:1px dashed var(--grid-line-color);" }
-                    }
+                div { class: "pointer-events-none absolute inset-y-0 left-0 z-10", style: "border-left:1px solid var(--grid-line-color);" }
+                div { class: "pointer-events-none absolute inset-y-0 right-0 z-10", style: "border-right:1px solid var(--grid-line-color);" }
+                if matches!(grid_type, GridType::Default) {
+                    div { class: "pointer-events-none absolute bottom-0 left-1/2 z-10 w-screen -translate-x-1/2", style: "border-bottom:1px solid var(--grid-line-color);" }
+                } else if matches!(grid_type, GridType::Inner) {
+                    div { class: "pointer-events-none absolute inset-x-0 top-0 z-10", style: "border-top:1px solid var(--grid-line-color);" }
+                    div { class: "pointer-events-none absolute inset-x-0 bottom-0 z-10", style: "border-bottom:1px solid var(--grid-line-color);" }
+                }
+            } else if matches!(line_type, GridLineType::Dashed) {
+                div { class: "pointer-events-none absolute inset-y-0 left-0 z-10", style: "border-left:2px dashed var(--grid-line-color);" }
+                div { class: "pointer-events-none absolute inset-y-0 right-0 z-10", style: "border-right:2px dashed var(--grid-line-color);" }
+                if matches!(grid_type, GridType::Default) {
+                    div { class: "pointer-events-none absolute bottom-0 left-1/2 z-10 w-screen -translate-x-1/2", style: "border-bottom:2px dashed var(--grid-line-color);" }
+                } else if matches!(grid_type, GridType::Inner) {
+                    div { class: "pointer-events-none absolute inset-x-0 top-0 z-10", style: "border-top:2px dashed var(--grid-line-color);" }
+                    div { class: "pointer-events-none absolute inset-x-0 bottom-0 z-10", style: "border-bottom:2px dashed var(--grid-line-color);" }
+                }
             }
-            if is_dot_on && matches!(grid_type, GridType::Default) {
-                div { class: "absolute bottom-0 left-0 z-20 h-1.5 w-1.5 -translate-x-1/2 translate-y-1/2 rounded-full", style: "background-color: var(--grid-dot-color);" }
-                div { class: "absolute bottom-0 right-0 z-20 h-1.5 w-1.5 translate-x-1/2 translate-y-1/2 rounded-full", style: "background-color: var(--grid-dot-color);" }
+            if is_dot_on {
+                if matches!(grid_type, GridType::Default) {
+                    div { class: "absolute bottom-0 left-0 z-20 h-1.5 w-1.5 -translate-x-1/2 translate-y-1/2 rounded-full", style: "background-color: var(--grid-dot-color);" }
+                    div { class: "absolute bottom-0 right-0 z-20 h-1.5 w-1.5 translate-x-1/2 translate-y-1/2 rounded-full", style: "background-color: var(--grid-dot-color);" }
+                } else if matches!(grid_type, GridType::Inner) {
+                    div { class: "absolute top-0 left-0 z-20 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full", style: "background-color: var(--grid-dot-color);" }
+                    div { class: "absolute top-0 right-0 z-20 h-1.5 w-1.5 translate-x-1/2 -translate-y-1/2 rounded-full", style: "background-color: var(--grid-dot-color);" }
+                    div { class: "absolute bottom-0 left-0 z-20 h-1.5 w-1.5 -translate-x-1/2 translate-y-1/2 rounded-full", style: "background-color: var(--grid-dot-color);" }
+                    div { class: "absolute bottom-0 right-0 z-20 h-1.5 w-1.5 translate-x-1/2 translate-y-1/2 rounded-full", style: "background-color: var(--grid-dot-color);" }
+                }
             }
 
             if is_pixel {

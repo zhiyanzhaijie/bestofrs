@@ -322,14 +322,14 @@ pub fn ScaleIcon(
 }
 
 #[component]
-pub fn UsersRoundIcon(
+pub fn CircleDotIcon(
     #[props(default = 24)] width: u32,
     #[props(default = 24)] height: u32,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
 ) -> Element {
     rsx! {
         svg {
-            class: "lucide lucide-arrow-left-icon lucide-arrow-left",
+            class: "lucide lucide-circle-dot-icon lucide-circle-dot",
             fill: "none",
             height: "{height}",
             stroke: "currentColor",
@@ -340,8 +340,62 @@ pub fn UsersRoundIcon(
             width: "{width}",
             xmlns: "http://www.w3.org/2000/svg",
             ..attributes,
-            path { d: "m12 19-7-7 7-7" }
-            path { d: "M19 12H5" }
+            circle { cx: "12", cy: "12", r: "10" }
+            circle { cx: "12", cy: "12", r: "1" }
+        }
+    }
+}
+
+#[component]
+pub fn GitForkIcon(
+    #[props(default = 24)] width: u32,
+    #[props(default = 24)] height: u32,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+) -> Element {
+    rsx! {
+        svg {
+            class: "lucide lucide-git-fork-icon lucide-git-fork",
+            fill: "none",
+            height: "{height}",
+            stroke: "currentColor",
+            stroke_linecap: "round",
+            stroke_linejoin: "round",
+            stroke_width: "2",
+            view_box: "0 0 24 24",
+            width: "{width}",
+            xmlns: "http://www.w3.org/2000/svg",
+            ..attributes,
+            circle { cx: "12", cy: "18", r: "3" }
+            circle { cx: "6", cy: "6", r: "3" }
+            circle { cx: "18", cy: "6", r: "3" }
+            path { d: "M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9" }
+            path { d: "M12 12v3" }
+        }
+    }
+}
+
+#[component]
+pub fn UsersRoundIcon(
+    #[props(default = 24)] width: u32,
+    #[props(default = 24)] height: u32,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+) -> Element {
+    rsx! {
+        svg {
+            class: "lucide lucide-users-round-icon lucide-users-round",
+            fill: "none",
+            height: "{height}",
+            stroke: "currentColor",
+            stroke_linecap: "round",
+            stroke_linejoin: "round",
+            stroke_width: "2",
+            view_box: "0 0 24 24",
+            width: "{width}",
+            xmlns: "http://www.w3.org/2000/svg",
+            ..attributes,
+            path { d: "M18 21a8 8 0 0 0-16 0" }
+            circle { cx: "10", cy: "8", r: "5" }
+            path { d: "M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" }
         }
     }
 }
