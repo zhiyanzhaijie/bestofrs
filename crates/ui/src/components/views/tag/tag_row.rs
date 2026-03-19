@@ -1,3 +1,4 @@
+use crate::components::icons::FishingHookIcon;
 use dioxus::prelude::*;
 
 use crate::root::Route;
@@ -6,12 +7,7 @@ use crate::types::tags::TagListItemDto;
 use super::mini_repo_card::MiniRepoCard;
 
 #[component]
-pub fn TagRow(
-    tag: TagListItemDto,
-    index: usize,
-    current_page: u32,
-    page_size: u32,
-) -> Element {
+pub fn TagRow(tag: TagListItemDto, index: usize, current_page: u32, page_size: u32) -> Element {
     let outlined = tag
         .label
         .split(':')
@@ -30,25 +26,21 @@ pub fn TagRow(
     rsx! {
         article {
             id: "{tag.value}",
-            class: "group relative overflow-hidden px-8 py-12 last:border-0",
-            style: "scroll-margin-top: 80px;",
+            class: "group relative overflow-hidden px-8 py-12 last:border-0 hover:cursor-pointer scroll-mt-20",
             div {
-                class: "relative z-0 mb-[-30px] font-mono whitespace-nowrap text-5xl font-bold leading-none tracking-wide opacity-50 md:mb-[-60px] md:text-[120px]",
-                style: "-webkit-text-stroke: 2px color-mix(in oklab, var(--secondary-color) 22%, transparent); color: transparent;",
+                class: "relative z-0 font-mono whitespace-nowrap text-5xl font-bold leading-none tracking-wide text-transparent opacity-50 transition-all duration-300 md:mb-[-10px] md:text-[120px] [-webkit-text-stroke:1px_var(--secondary-color-5)] group-hover:opacity-80 group-hover:[-webkit-text-stroke:3px_var(--grid-accent)]",
                 "{outlined}"
             }
             div { class: "relative z-10 flex px-20 flex-col gap-6",
                 div { class: "flex items-center gap-4",
                     span {
-                        class: "text-[12px] font-mono font-bold uppercase tracking-[0.6em]",
-                        style: "color: var(--grid-accent);",
+                        class: "text-[12px] font-mono font-bold uppercase tracking-[0.6em] text-grid-accent",
                         "#{tag.value}"
                     }
-                    div { class: "h-[1px] flex-grow", style: "background-color: color-mix(in oklab, var(--grid-accent) 30%, transparent);" }
+                    div { class: "h-0.5 group-hover:h-1 flex-grow bg-grid-accent/30" }
                 }
                 p {
-                    class: "max-w-3xl border-l-4 pl-10 py-2 font-serif text-2xl italic leading-relaxed text-secondary-4 opacity-50",
-                    style: "border-left-color: color-mix(in oklab, var(--grid-accent) 40%, transparent);",
+                    class: "max-w-3xl border-l-4 border-grid-accent/30 py-2 pl-10 font-serif text-2xl italic leading-relaxed text-secondary/30 group-hover:text-secondary/50",
                     "{description}"
                 }
                 div { class: "pt-0",
@@ -73,11 +65,11 @@ pub fn TagRow(
                             }
                         }
                         div { class: "min-w-0 flex-1 self-stretch flex flex-col",
-                            div { class: "mb-2 flex items-center gap-4",
+                            div { class: "flex items-center gap-4",
                                 div { class: "text-[10px] font-mono uppercase tracking-[0.4em] text-secondary-6",
                                     "TOP10"
                                 }
-                                div { class: "h-px flex-grow border-t border-dashed border-primary-6" }
+                                div { class: "flex-grow border-t-4 border-dashed border-primary-6" }
                             }
                             div { class: "flex flex-1 flex-wrap content-center items-center justify-start gap-2",
                                 for (repo_idx, repo) in tag.top_repos.into_iter().take(10).enumerate() {
@@ -86,8 +78,7 @@ pub fn TagRow(
                             }
                         }
                         Link {
-                            class: "ml-auto self-start border px-3 py-1 text-xs font-mono tracking-wider transition-colors",
-                            style: "border-color: var(--grid-accent); color: var(--grid-accent); background-color: color-mix(in oklab, var(--grid-accent) 10%, transparent);",
+                            class: "ml-auto self-start text-primary-6 transition-colors duration-300 hover:text-grid-accent group-hover:text-grid-accent",
                             to: Route::RepoListView {
                                 tags: Some(tag.value.clone()),
                                 metric: None,
@@ -95,7 +86,7 @@ pub fn TagRow(
                                 page: None,
                                 size: None,
                             },
-                            "OPEN"
+                            FishingHookIcon { width: 108, height: 108 }
                         }
                     }
                 }

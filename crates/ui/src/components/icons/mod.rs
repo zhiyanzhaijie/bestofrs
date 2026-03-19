@@ -549,6 +549,69 @@ pub fn GitForkIcon(
 }
 
 #[component]
+pub fn CalendarDaysIcon(
+    #[props(default = 24)] width: u32,
+    #[props(default = 24)] height: u32,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+) -> Element {
+    rsx! {
+        svg {
+            class: "lucide lucide-calendar-days-icon lucide-calendar-days",
+            fill: "none",
+            height: "{height}",
+            stroke: "currentColor",
+            stroke_linecap: "round",
+            stroke_linejoin: "round",
+            stroke_width: "2",
+            view_box: "0 0 24 24",
+            width: "{width}",
+            xmlns: "http://www.w3.org/2000/svg",
+            ..attributes,
+            path { d: "M8 2v4" }
+            path { d: "M16 2v4" }
+            rect {
+                width: "18",
+                height: "18",
+                x: "3",
+                y: "4",
+                rx: "2",
+            }
+            path { d: "M3 10h18" }
+            path { d: "M8 14h.01" }
+            path { d: "M12 14h.01" }
+            path { d: "M16 14h.01" }
+            path { d: "M8 18h.01" }
+            path { d: "M12 18h.01" }
+            path { d: "M16 18h.01" }
+        }
+    }
+}
+#[component]
+pub fn FishingHookIcon(
+    #[props(default = 24)] width: u32,
+    #[props(default = 24)] height: u32,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+) -> Element {
+    rsx! {
+        svg {
+            class: "lucide lucide-fishing-hook-icon lucide-fishing-hook",
+            fill: "none",
+            height: "{height}",
+            stroke: "currentColor",
+            stroke_linecap: "round",
+            stroke_linejoin: "round",
+            stroke_width: "2",
+            view_box: "0 0 24 24",
+            width: "{width}",
+            xmlns: "http://www.w3.org/2000/svg",
+            ..attributes,
+            path { d: "m17.586 11.414-5.93 5.93a1 1 0 0 1-8-8l3.137-3.137a.707.707 0 0 1 1.207.5V10" }
+            path { d: "M20.414 8.586 22 7" }
+            circle { cx: "19", cy: "10", r: "2" }
+        }
+    }
+}
+#[component]
 pub fn UsersRoundIcon(
     #[props(default = 24)] width: u32,
     #[props(default = 24)] height: u32,

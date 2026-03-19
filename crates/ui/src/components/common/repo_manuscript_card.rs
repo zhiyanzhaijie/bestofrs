@@ -1,5 +1,5 @@
 use crate::components::common::RepoAvatar;
-use crate::components::icons::{ArrowRightIcon, GithubIcon, HouseIcon, StarIcon};
+use crate::components::icons::{CircleDotIcon, GitForkIcon, GithubIcon, HouseIcon, StarIcon};
 use crate::components::ui::avatar::AvatarImageSize;
 use crate::root::Route;
 use crate::types::repos::RepoDto;
@@ -14,6 +14,7 @@ pub fn RepoManuscriptCard(
         id,
         stars,
         forks,
+        open_issues,
         description,
         homepage_url,
         avatar_urls,
@@ -91,16 +92,16 @@ pub fn RepoManuscriptCard(
             div { class: "flex shrink-0 flex-row items-center justify-between gap-2 p-4 md:w-36 md:flex-col md:items-end",
                 div { class: "flex w-full flex-col items-end gap-1 text-xs font-mono text-secondary-5",
                     div { class: "flex w-full items-center justify-end gap-2",
-                        span { class: "font-medium", "{stars}" }
-                        StarIcon { width: 12, height: 12, class: "text-secondary-4" }
+                        span { class: "font-bold text-secondary-5 transition-colors group-hover:text-secondary-3", "{stars}" }
+                        StarIcon { width: 12, height: 12, class: "text-secondary-4 transition-colors group-hover:text-secondary-2" }
                     }
                     div { class: "flex w-full items-center justify-end gap-2",
-                        span { "{forks}" }
-                        span { class: "text-secondary-4", "⑂" }
+                        span { class: "font-bold text-secondary-5 transition-colors group-hover:text-secondary-3", "{forks}" }
+                        GitForkIcon { width: 12, height: 12, class: "text-secondary-4 transition-colors group-hover:text-secondary-2" }
                     }
-                    div { class: "mt-0.5 flex w-full items-center justify-end gap-2 font-bold text-secondary-3",
-                        span { "VIEW" }
-                        ArrowRightIcon { width: 12, height: 12 }
+                    div { class: "flex w-full items-center justify-end gap-2",
+                        span { class: "font-bold text-secondary-5 transition-colors group-hover:text-secondary-3", "{open_issues}" }
+                        CircleDotIcon { width: 12, height: 12, class: "text-secondary-4 transition-colors group-hover:text-secondary-2" }
                     }
                 }
                 div { class: "mt-auto w-full border-t border-primary-5 pt-2 text-right text-[10px] font-mono text-secondary-5",
@@ -113,7 +114,7 @@ pub fn RepoManuscriptCard(
                 }
                 div { class: "flex flex-wrap justify-start gap-x-2 gap-y-2",
                     for tag in tags.iter().take(6) {
-                        span { class: "border-b border-primary-5 pb-0.5 font-mono text-[10px] uppercase tracking-wider text-secondary-5 transition-colors group-hover:border-secondary-6 group-hover:text-secondary-6",
+                        span { class: "border-b border-primary-5 pb-0.5 font-mono text-[10px] uppercase tracking-wider text-secondary-5 transition-colors hover:border-secondary-6 hover:text-secondary-6",
                             "#{tag.label}"
                         }
                     }

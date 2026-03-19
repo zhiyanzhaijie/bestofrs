@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 pub(super) fn HomeFaqSection() -> Element {
     rsx! {
         div { class: "w-full max-w-7xl px-8 mb-32 relative z-10",
-            div { class: "border-t border-primary-6 pt-20",
+            div { class: "pt-20",
                 div { class: "flex items-center gap-3 mb-8",
                     div { class: "w-8 h-[1px] bg-secondary-6" }
                     span { class: "font-mono text-[10px] tracking-[0.5em] uppercase text-secondary-6 font-bold", "FAQ" }
@@ -18,7 +18,7 @@ pub(super) fn HomeFaqSection() -> Element {
                     HomeFaqItem {
                         index: 1,
                         question: "How are projects ranked?",
-                        answer: "Projects are ranked based on their GitHub star growth over the selected period (daily, weekly, monthly). This highlights what's currently trending in the Rust community.",
+                        answer: "Projects are ranked based on their GitHub growth on dimension like Star, Fork and Issue, over the selected period (daily, weekly, monthly). This highlights what's currently trending in the Rust community.",
                     }
                     HomeFaqItem {
                         index: 2,

@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::components::common::IOCell;
+use crate::components::icons::{
+    ArrowRightIcon, CalendarDaysIcon, CircleDotIcon, GitForkIcon, StarIcon,
+};
+use crate::components::{common::IOCell, icons::RustGearIcon};
 use crate::root::Route;
 use crate::types::repos::RepoDto;
 use app::repo::{RepoRankMetric as RankType, RepoRankTimeRange as TimeRange};
@@ -20,6 +23,14 @@ fn rank_metric_query(metric: RankType) -> &'static str {
         RankType::Issue => "issue",
         RankType::Recent => "recent",
     }
+}
+
+pub(super) fn stat_icon_tab(tab: RankType) -> Element {
+    stat_icon_with_size(tab, 16)
+}
+
+pub(super) fn stat_icon_list(tab: RankType) -> Element {
+    stat_icon_with_size(tab, 12)
 }
 
 fn rank_range_query(range: TimeRange) -> &'static str {
@@ -67,19 +78,25 @@ pub(super) fn rainbow_color(index: usize) -> &'static str {
 #[component]
 pub(super) fn HomeRankPanel() -> Element {
     let mut active_tab = use_signal(|| RankType::Star);
-    let mut time_range = use_signal(|| TimeRange::Weekly);
+    let mut time_range = use_signal(|| TimeRange::Daily);
 
     rsx! {
         div { class: "bg-primary border border-2 border-x-4 border-primary-6 shadow-2xl rounded-[3.5rem] overflow-hidden flex flex-col lg:flex-row min-h-[600px] transition-colors duration-300 relative z-10",
             div { class: "w-full lg:w-[260px] flex flex-col bg-primary border-r border-primary-6 self-stretch p-4",
-                div { class: "p-4 mb-2",
-                    h3 { class: "text-2xl font-black font-sans uppercase tracking-tighter italic text-secondary-1", "Rankings" }
-                    p { class: "text-[10px] font-mono text-secondary-6 uppercase tracking-widest mt-1 font-bold", "Metric_Select" }
+                div { class: "p-4 mb-2 flex items-center gap-2",
+                    RustGearIcon { width: 48.0 }
+                    div {
+                        h3 { class: "text-2xl font-black font-sans uppercase tracking-tighter italic text-secondary-1",
+                            "Ranking"
+                        }
+                        p { class: "text-[10px] font-mono text-secondary-6 uppercase tracking-widest mt-1 font-bold",
+                            "in metric"
+                        }
+                    }
                 }
                 div { class: "flex flex-col flex-grow gap-2 overflow-hidden",
-                    for (idx, tab) in [RankType::Star, RankType::Fork, RankType::Issue, RankType::Recent].into_iter().enumerate() {
+                    for tab in [RankType::Star, RankType::Fork, RankType::Issue, RankType::Recent] {
                         HomeRankTabItem {
-                            idx,
                             tab,
                             active_tab: active_tab(),
                             on_select: move |_| active_tab.set(tab),
@@ -88,13 +105,13 @@ pub(super) fn HomeRankPanel() -> Element {
                 }
                 div { class: "mt-auto p-6 border-t border-primary-6",
                     div { class: "flex items-center gap-2 text-[8px] font-mono text-secondary-5 uppercase tracking-widest",
-                        div { class: "w-1 h-1 bg-secondary-6 rounded-full animate-pulse" }
+                        div { class: "w-2 h-2 bg-secondary-6 rounded-full animate-pulse" }
                         "Active"
                     }
                 }
             }
             div { class: "w-full lg:flex-grow px-5 md:px-6 bg-primary-1/60 flex flex-col self-stretch mx-4 my-6 rounded-[2.5rem]",
-                div { class: "flex flex-col xl:flex-row items-start xl:items-center justify-between mb-6 pb-4 border-b-2 border-primary-6 gap-4",
+                div { class: "flex flex-col xl:flex-row items-start xl:items-center justify-between mb-6 pb-8 border-b-2 border-primary-6 gap-4",
                     div { class: "flex flex-wrap items-center gap-6",
                         if active_tab() != RankType::Recent {
                             for range in [TimeRange::Daily, TimeRange::Weekly, TimeRange::Monthly] {
@@ -108,7 +125,7 @@ pub(super) fn HomeRankPanel() -> Element {
                             div { class: "relative group",
                                 div { class: "absolute inset-0 rounded-full bg-primary-1 border-2 border-primary-6 translate-x-[10px] translate-y-[10px]" }
                                 div { class: "relative px-8 py-3 rounded-full text-sm font-black font-sans uppercase tracking-[0.2em] italic bg-secondary-2 text-primary border-4 border-secondary-2 translate-x-[3.82px] translate-y-[3.82px] shadow-[0_0_20px_color-mix(in_oklab,var(--grid-accent)_24%,transparent)]",
-                                    "Latest_Transmissions"
+                                    "Latest Insert"
                                 }
                             }
                         }
@@ -124,17 +141,15 @@ pub(super) fn HomeRankPanel() -> Element {
                         class: "relative group",
                         div { class: "absolute inset-0 rounded-full bg-primary-1 border-2 border-primary-6 translate-x-[10px] translate-y-[10px] transition-all duration-300 group-hover:border-focused-border" }
                         div { class: "relative flex items-center gap-3 px-8 py-3 rounded-full bg-primary border-4 border-secondary-2 text-secondary-2 group-hover:bg-secondary-2 group-hover:text-primary group-hover:translate-x-[3.82px] group-hover:translate-y-[3.82px] transition-all duration-300 ease-out",
-                            span { class: "font-black font-sans text-sm uppercase tracking-[0.2em] italic", "View_All" }
-                            span { class: "group-hover:translate-x-1 transition-transform", "→" }
+                            ArrowRightIcon {  }
                         }
                     }
                 }
                 IOCell {
-                    loading_fallback: rsx! { RankPanelListSkeleton {} },
-                    HomeRankPanelList {
-                        active_tab,
-                        time_range,
-                    }
+                    loading_fallback: rsx! {
+                        RankPanelListSkeleton {}
+                    },
+                    HomeRankPanelList { active_tab, time_range }
                 }
             }
         }
@@ -156,6 +171,7 @@ pub(super) fn map_rank_repo(repo: RepoDto) -> HomeRankRepo {
         .last_fetched_at
         .clone()
         .unwrap_or_else(|| "1970-01-01".to_string());
+
     HomeRankRepo {
         id: repo.id,
         name,
@@ -210,17 +226,15 @@ pub(super) fn rank_title(tab: RankType) -> &'static str {
 
 pub(super) fn rank_desc(tab: RankType) -> &'static str {
     match tab {
-        RankType::Star => {
-            "Highest community validation and visibility. The gold standard of Rust excellence."
-        }
+        RankType::Star => "High-signal consensus. The gold standard for Rust ecosystem visibility.",
         RankType::Fork => {
-            "Most active foundations for extension. High-utility codebases built for growth."
+            "High-extensibility codebases. The foundation for downstream scaling and growth."
         }
         RankType::Issue => {
-            "High-velocity development environments. Active problem-solving and iteration."
+            "Active feedback loops. High-velocity iteration and real-time problem solving."
         }
         RankType::Recent => {
-            "Freshly tracked transmissions. The latest additions to the manuscript archive."
+            "Latest registry snapshots. Recently indexed entries in the Best of RS archive."
         }
     }
 }
@@ -247,11 +261,11 @@ fn short_date(value: &str) -> String {
     value[..cutoff].to_string()
 }
 
-pub(super) fn stat_icon(tab: RankType) -> &'static str {
+fn stat_icon_with_size(tab: RankType, size: u32) -> Element {
     match tab {
-        RankType::Star => "★",
-        RankType::Fork => "⑂",
-        RankType::Issue => "!",
-        RankType::Recent => "↻",
+        RankType::Star => rsx! { StarIcon { width: size, height: size } },
+        RankType::Fork => rsx! { GitForkIcon { width: size, height: size } },
+        RankType::Issue => rsx! { CircleDotIcon { width: size, height: size } },
+        RankType::Recent => rsx! { CalendarDaysIcon { width: size, height: size } },
     }
 }

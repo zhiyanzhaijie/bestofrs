@@ -7,12 +7,14 @@ use crate::root::Route;
 pub fn HeaderNav() -> Element {
     let user_state = use_context::<UserContext>();
     let show_admin = matches!(user_state(), UserState::User(me) if me.role == "Admin");
+    let nav_link_class =
+        "px-3 py-1 font-mono text-xs tracking-wide text-secondary-5 transition-colors hover:text-secondary-3";
 
     rsx! {
         nav { class: "flex items-center gap-2 text-sm",
-            Link { class: "border border-transparent px-3 py-1 font-mono text-xs tracking-wide text-secondary-5 transition-all hover:border-primary-6 hover:bg-primary-1 hover:text-secondary-3", to: Route::HomeView {}, "HOME" }
+            Link { class: "{nav_link_class}", to: Route::HomeView {}, "HOME" }
             Link {
-                class: "border border-transparent px-3 py-1 font-mono text-xs tracking-wide text-secondary-5 transition-all hover:border-primary-6 hover:bg-primary-1 hover:text-secondary-3",
+                class: "{nav_link_class}",
                 to: Route::RepoListView {
                     tags: None,
                     metric: None,
@@ -22,10 +24,10 @@ pub fn HeaderNav() -> Element {
                 },
                 "REPO"
             }
-            Link { class: "border border-transparent px-3 py-1 font-mono text-xs tracking-wide text-secondary-5 transition-all hover:border-primary-6 hover:bg-primary-1 hover:text-secondary-3", to: Route::TagListView {}, "TAGS" }
-            Link { class: "border border-transparent px-3 py-1 font-mono text-xs tracking-wide text-secondary-5 transition-all hover:border-primary-6 hover:bg-primary-1 hover:text-secondary-3", to: Route::AboutView {}, "ABOUT" }
+            Link { class: "{nav_link_class}", to: Route::TagListView {}, "TAGS" }
+            Link { class: "{nav_link_class}", to: Route::AboutView {}, "ABOUT" }
             if show_admin {
-                Link { class: "border border-transparent px-3 py-1 font-mono text-xs tracking-wide text-secondary-5 transition-all hover:border-primary-6 hover:bg-primary-1 hover:text-secondary-3", to: Route::AdminProjectsView {}, "ADMIN" }
+                Link { class: "{nav_link_class}", to: Route::AdminProjectsView {}, "ADMIN" }
             }
         }
     }

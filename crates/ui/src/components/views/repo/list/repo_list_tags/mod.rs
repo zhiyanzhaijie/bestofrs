@@ -38,7 +38,7 @@ pub(super) fn RepoListTags() -> Element {
                             for tag in (ctx.active_tags)().iter() {
                                 button {
                                     key: "{tag}",
-                                    class: "flex items-center gap-1.5 px-3 py-1.5 bg-secondary-2 text-primary border border-secondary-2 rounded-none text-xs font-bold font-mono uppercase tracking-wider",
+                                    class: "flex items-center gap-1.5 px-3 py-1.5 bg-secondary-2 text-primary border border-secondary-2 rounded-none text-xs font-bold font-mono uppercase tracking-wider hover:cursor-pointer",
                                     onclick: {
                                         let tag = tag.clone();
                                         move |_| {
@@ -68,7 +68,7 @@ pub(super) fn RepoListTags() -> Element {
                             for advice in advice_tags {
                                 button {
                                     key: "{advice.key}",
-                                    class: "flex items-center gap-1.5 px-3 py-1.5 bg-primary border border-primary-6 text-secondary-5 rounded-none text-xs font-bold font-mono uppercase tracking-wider hover:border-secondary-3 hover:text-secondary-3 transition-colors",
+                                    class: "flex items-center gap-1.5 px-3 py-1.5 bg-primary border border-primary-6 text-secondary-5 rounded-none text-xs font-bold font-mono uppercase tracking-wider hover:border-secondary-3 hover:text-secondary-3 hover:cursor-pointer transition-colors",
                                     onclick: {
                                         move |_| {
                                             let query = append_tag_query(&(ctx.active_tags)(), &advice.key);

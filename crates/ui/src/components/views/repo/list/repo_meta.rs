@@ -20,8 +20,8 @@ pub(super) fn RepoMeta() -> Element {
                     "All Project"
                 }
             }
-            p { class: "text-secondary-3 text-sm md:text-base leading-relaxed font-mono italic",
-                "A comprehensive catalog of the Rust ecosystem. Monitor growth, track updates, and discover foundational codebases."
+            h2 { class: "text-secondary-3 text-sm md:text-base leading-relaxed font-mono italic",
+                "A curated collection of the Rust ecosystem. Monitor things growth, track update velocity, and discover the core building blocks of Rust."
             }
         }
     }
