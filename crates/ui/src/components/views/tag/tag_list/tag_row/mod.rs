@@ -4,10 +4,17 @@ use dioxus::prelude::*;
 use crate::root::Route;
 use crate::types::tags::TagListItemDto;
 
-use super::mini_repo_card::MiniRepoCard;
+use mini_repo_card::MiniRepoCard;
+
+mod mini_repo_card;
 
 #[component]
-pub fn TagRow(tag: TagListItemDto, index: usize, current_page: u32, page_size: u32) -> Element {
+pub(super) fn TagRow(
+    tag: TagListItemDto,
+    index: usize,
+    current_page: u32,
+    page_size: u32,
+) -> Element {
     let outlined = tag
         .label
         .split(':')
