@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::components::{common::LottieWebComp, icons::RustGearIcon};
+use crate::{
+    components::{common::LottieWebComp, icons::RustGearIcon},
+    IO::health::today,
+};
 
 const LOTTIE_GEAR_ASSET: Asset = asset!("/assets/ferris-gear.lottie");
 const VIEW_W: f32 = 1000.0;
@@ -27,7 +30,12 @@ pub fn GearMap(
     #[props(default = String::from("text-primary-6/70"))] class: String,
     #[props(default = 180)] height: u32,
 ) -> Element {
-    let gears = use_memo(move || generate_gears(count, seed));
+    let today_seed = use_server_future(today).ok();
+    let resolved_seed = today_seed
+        .as_ref()
+        .and_then(|resource| resource().and_then(Result::ok))
+        .unwrap_or(seed);
+    let gears = use_memo(move || generate_gears(count, resolved_seed));
 
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("./style.css") }
@@ -38,34 +46,33 @@ pub fn GearMap(
             for (idx, gear) in gears().iter().enumerate() {
                 div {
                     key: "{idx}",
+                    class: "gear-item",
                     class: if gear.is_lottie {
-                        "absolute gear-lottie-drop-in"
+                        "gear-lottie-drop-in"
                     } else {
-                        "absolute"
+                        ""
                     },
-                    style: "
-                        left: {gear.left_pct:.2}%;
-                        top: {gear.top_pct:.2}%;
-                        width: {gear.size_pct:.3}%;
-                        aspect-ratio: 1 / 1;
-                        opacity: 0.30;
-                        transform: translate(-50%, -50%) rotate({gear.rotation_deg:.1}deg);
-                    ",
+                    style: "--gear-left-pct: {gear.left_pct:.2}%; --gear-top-pct: {gear.top_pct:.2}%; --gear-size-pct: {gear.size_pct:.3}%; --gear-rotation-deg: {gear.rotation_deg:.1}deg;",
                     div {
+                        class: "animate-spin gear-spin gear-spin-delayed",
                         class: if gear.clockwise {
-                            "animate-spin gear-spin gear-spin-cw gear-spin-delayed"
+                            "gear-spin-cw"
                         } else {
-                            "animate-spin gear-spin gear-spin-ccw gear-spin-delayed"
+                            "gear-spin-ccw"
                         },
                         style: "--gear-spin-seconds: {gear.spin_seconds:.1}s;",
-                        if gear.is_lottie {
-                            LottieWebComp {
-                                src: LOTTIE_GEAR_ASSET.to_string(),
-                                width: gear.size as u32,
-                                height: gear.size as u32,
+                        div {
+                            class: "gear-visual",
+                            if gear.is_lottie {
+                                LottieWebComp {
+                                    src: LOTTIE_GEAR_ASSET.to_string(),
+                                }
+                            } else {
+                                RustGearIcon {
+                                    width: gear.size,
+                                    style: "width: 100%; height: 100%; display: block;",
+                                }
                             }
-                        } else {
-                            RustGearIcon { width: gear.size }
                         }
                     }
                 }
@@ -92,7 +99,7 @@ fn generate_gears(count: usize, seed: u64) -> Vec<GearItem> {
     let approx_side = ((count as f32) * 0.10).ceil().max(1.0) as usize;
 
     for i in 0..count {
-        let size = lerp(118.0, 220.0, next_f32(&mut state));
+        let size = lerp(140.0, 260.0, next_f32(&mut state));
         let radius = size * 0.5;
         let lane = lane_pattern[(i + lane_phase) % lane_pattern.len()];
         let slot = lane_counts[lane];

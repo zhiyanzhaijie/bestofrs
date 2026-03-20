@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 
 use super::gearmap::GearMap;
 use crate::{
+    components::common::IOCell,
     components::icons::{BORSFerrisIcon, DioxusIcon, FerrisIcon, HeartIcon},
     root::Route,
 };
@@ -11,11 +12,15 @@ pub fn Footer() -> Element {
     rsx! {
         footer { class: "relative mt-auto h-full min-h-[340px] overflow-hidden bg-transparent",
             div { class: "pointer-events-none absolute inset-x-0 bottom-0 h-[460px] overflow-hidden -z-0",
-                GearMap {
-                    count: 7,
-                    class: "text-secondary-6/60",
-                    height: 460,
-                    seed: 12,
+                IOCell {
+                    loading_fallback: rsx! {
+                        div { class: "h-full w-full" }
+                    },
+                    GearMap {
+                        count: 7,
+                        class: "text-secondary-6/60",
+                        height: 460,
+                    }
                 }
             }
             div { class: "relative z-10 flex h-full min-h-[340px] flex-col px-6 py-8 md:px-10",

@@ -5,17 +5,15 @@ const DOTLOTTIE_WC_CDN: &str = "https://unpkg.com/@lottiefiles/dotlottie-wc/dist
 #[component]
 pub fn LottieWebComp(
     src: String,
-    #[props(default = 256)] width: u32,
-    #[props(default = 256)] height: u32,
 ) -> Element {
-    let style = format!("width: {width}px; height: {height}px; display: inline-block;");
+    let style = "width: 100%; height: 100%; display: block;".to_string();
 
     rsx! {
         document::Script { src: DOTLOTTIE_WC_CDN, r#type: "module" }
         dotlottie-wc {
             src,
             autoplay: true,
-            "loop": true,
+            loop: false,
             style,
         }
     }

@@ -79,22 +79,6 @@ pub fn Home() -> Element {
                         h2 { class: "text-xl md:text-2xl text-secondary-4 font-serif italic leading-relaxed max-w-xl mb-12",
                             "The curated archive of Rust's finest. Tracking community health and project velocity, one snapshot at a time."
                         }
-                        div { class: "flex items-center gap-8",
-                            Link {
-                                to: Route::RepoListView {
-                                    tags: None,
-                                    metric: None,
-                                    range: None,
-                                    page: None,
-                                    size: None,
-                                },
-                                class: "group flex items-center gap-4 text-5xl font-mono font-bold uppercase tracking-[0.3em] text-secondary-2 hover:text-secondary-6 transition-colors",
-                                "GO"
-                                span { class: "group-hover:translate-x-2 transition-transform",
-                                    ArrowRightIcon { width: 36, height: 36 }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -117,7 +101,7 @@ pub fn Home() -> Element {
                 },
                 HomeActionSection {}
             }
-            GridSlashTransition {  }
+            GridSlashTransition {}
         }
     }
 }

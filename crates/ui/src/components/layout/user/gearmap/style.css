@@ -7,6 +7,22 @@
   animation-duration: var(--gear-spin-seconds, 60s);
 }
 
+.gear-visual {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.gear-item {
+  position: absolute;
+  left: var(--gear-left-pct, 50%);
+  top: var(--gear-top-pct, 50%);
+  width: var(--gear-size-pct, 10%);
+  aspect-ratio: 1 / 1;
+  opacity: 0.30;
+  transform: translate(-50%, -50%) rotate(var(--gear-rotation-deg, 0deg));
+}
+
 .gear-spin-cw {
   animation-direction: normal;
 }
