@@ -1,7 +1,7 @@
-name: "Repository 举荐 / Repository Recommendation"
-description: "向 Best Of Rust 举荐好用的 Rust 项目 / Recommend a Rust project to Best Of Rust"
-title: "[举荐] "
-labels: ["recommendation"]
+name: "Recommend One"
+description: "Recommend a Rust project to Best Of Rust"
+title: "[Recommend One] "
+labels: ["Recommend One"]
 body:
   - type: markdown
     attributes:
@@ -11,27 +11,45 @@ body:
 
         你可以使用在此向 Best Of Rust 举荐那些好用的 Rust 项目。
         *You can recommend useful Rust projects to Best Of Rust here.*
+  - type: markdown
+    attributes:
+      value: |
+        ## 1. 仓库地址 / Repository URL
+        请提供项目的 GitHub 仓库地址。
+        Please provide the GitHub repository URL of the project.
 
   - type: input
     id: repo_url
     attributes:
-      label: "1. 这个项目的 GitHub 仓库地址是？\n*1. What is the GitHub repository URL of this project?*"
+      label: "仓库地址 / Repository URL"
       placeholder: "https://github.com/owner/repo"
     validations:
       required: true
+  - type: markdown
+    attributes:
+      value: |
+        ## 2. Tag 分类 / Tags
+        这个项目应归属到哪些 Tag 分类？（格式：tag1, tag2, tag3）
+        Which tags should this project belong to? (format: tag1, tag2, tag3)
 
   - type: input
     id: tags
     attributes:
-      label: "2. 这个项目的应该归属到哪些 Tag 分类下（参考格式：tag1, tag2, tag3...）？\n*2. Which tags should this project belong to (format: tag1, tag2, tag3...)?*"
+      label: "Tag 分类 / Tags"
       placeholder: "cli, web, database"
     validations:
       required: false
+  - type: markdown
+    attributes:
+      value: |
+        ## 3. 推荐理由 / Why this project
+        这个项目有哪些地方让你印象深刻？简要介绍即可（例如：它对你的影响、帮助、使用体验等）。
+        What impressed you about this project? A brief description is enough (e.g., impact, help, or usage experience).
 
   - type: textarea
     id: why_impressed
     attributes:
-      label: "3. 这个项目从哪些地方惊艳到你了？简单介绍就行（比如：它对你的影响、帮助……）。\n*3. What impressed you about this project? Briefly describe (e.g., impact/help to you).*"
+      label: "推荐理由 / Why this project"
       placeholder: "例如：它解决了什么问题？为什么比同类更好用？你的使用场景是什么？"
     validations:
       required: true
