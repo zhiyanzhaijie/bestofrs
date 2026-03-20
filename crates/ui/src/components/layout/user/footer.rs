@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use super::gearmap::GearMap;
 use crate::{
-    components::icons::{DioxusIcon, FerrisIcon, HeartIcon},
+    components::icons::{BORSFerrisIcon, DioxusIcon, FerrisIcon, HeartIcon},
     root::Route,
 };
 
@@ -21,10 +21,19 @@ pub fn Footer() -> Element {
             div { class: "relative z-10 flex h-full min-h-[340px] flex-col px-6 py-8 md:px-10",
                 div { class: "grid flex-1 grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-12",
                     section { class: "space-y-3 lg:col-span-5",
-                        div { class: "flex items-center gap-2",
-                            FerrisIcon { height: 34.0 }
-                            h4 { class: "text-lg font-bold tracking-tight text-secondary-3",
-                                "BEST OF RUST"
+                        div { class: "flex items-center gap-1 text-grid-accent",
+                            BORSFerrisIcon { width: 68.0 }
+                            h3 { class: "text-3xl font-extrabold",
+                                span { style: "color: #f28c1b;", "B" }
+                                span { style: "color: #d4b100;", "E" }
+                                span { style: "color: #2fa84f;", "S" }
+                                span { style: "color: #1aa6a6;", "T" }
+                                span { " " }
+                                span { style: "color: #2f6fd4;", "O" }
+                                span { style: "color: #8756c9;", "F" }
+                                span { " " }
+                                span { style: "color: #e8473c;", "R" }
+                                span { style: "color: #e8473c;", "S" }
                             }
                         }
                         p { class: "max-w-sm text-sm leading-relaxed text-secondary-5",

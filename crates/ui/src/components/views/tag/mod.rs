@@ -4,7 +4,7 @@ use crate::components::common::{
     CommonPagination, GradientDirection, GridBackground, GridPadding, GridPattern, GridType,
     GridWrapper, IOCell, SEOHead, SEOProp,
 };
-use crate::components::icons::MenuIcon;
+use crate::components::icons::{FerrisFisherIcon, FisherWaveIcon, MenuIcon};
 use crate::components::select::{
     Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
     SelectTrigger, SelectValue,
@@ -73,10 +73,7 @@ fn TagRouteMenu() -> Element {
             onmouseleave: move |_| ctx.menu_hovered.set(false),
             div { class: "relative text-right",
                 div { class: if hovered { "mb-2 inline-flex h-10 w-10 items-center justify-center text-grid-accent transition-colors" } else { "mb-2 inline-flex h-10 w-10 items-center justify-center text-secondary-6 transition-colors" },
-                    MenuIcon {
-                        width: 18,
-                        height: 18,
-                    }
+                    MenuIcon { width: 18, height: 18 }
                 }
                 div { class: if hovered { "absolute right-0 top-10 w-64 max-h-[calc(100vh-7.5rem)] overflow-auto space-y-1 pr-1 opacity-100 transition-opacity duration-150" } else { "pointer-events-none absolute right-0 top-10 w-64 max-h-0 overflow-hidden opacity-0 transition-opacity duration-150" },
                     if hovered {
@@ -117,7 +114,8 @@ pub fn TagList() -> Element {
         SEOHead {
             data: SEOProp {
                 title: "Tag Trends".into(),
-                description: "Explore a comprehensive tag index of the Rust ecosystem and discover curated projects by category on Best of RS.".into(),
+                description: "Explore a comprehensive tag index of the Rust ecosystem and discover curated projects by category on Best of RS."
+                    .into(),
                 keywords: "best of rs, rust tags, rust categories, rust group rank".into(),
                 canonical_url: "/tag".into(),
                 og_type: "website".into(),
@@ -126,8 +124,28 @@ pub fn TagList() -> Element {
         }
         TagRouteMenu {}
         GridWrapper {
+            class: "text-grid-accent",
+            grid_type: GridType::End,
+            padding: GridPadding::None,
+            GridWrapper {
+                class: "!absolute bottom-0 w-full h-5 overflow-y-visible pointer-events-none",
+                grid_type: GridType::End,
+                padding: GridPadding::None,
+                is_dot_on: false,
+                background: GridBackground {
+                    pattern: GridPattern::Dot,
+                    gradient: GradientDirection::None,
+                },
+                div { class: "absolute inset-0 bg-gradient-to-b from-grid-accent/30 via-grid-accent/20 to-grid-accent/10" }
+                div {
+                    class: "absolute bottom-5 w-full overflow-hidden text-grid-accent/24 pointer-events-none",
+                    FisherWaveIcon { class: "h-8 md:h-12" }
+                }
+            }
+            FerrisFisherIcon {}
+        }
+        GridWrapper {
             class: "min-h-screen",
-            bg_class: "opacity-60",
             grid_type: GridType::Default,
             padding: GridPadding::Lg,
             is_dot_on: true,
@@ -149,15 +167,11 @@ pub fn TagList() -> Element {
                         div { class: "flex items-center gap-4 justify-center",
                             div { class: "text-xs font-mono tracking-wide text-secondary-5",
                                 "List "
-                                span {
-                                    class: "font-semibold text-grid-accent",
+                                span { class: "font-semibold text-grid-accent",
                                     "{summary().from}-{summary().to}"
                                 }
                                 " of "
-                                span {
-                                    class: "font-semibold text-grid-accent",
-                                    "{summary().total}"
-                                }
+                                span { class: "font-semibold text-grid-accent", "{summary().total}" }
                             }
                             div { class: "flex items-center",
                                 Select::<u32> {
@@ -226,7 +240,7 @@ fn TagListIO() -> Element {
             Some((ctx.current_page)()),
             Some((ctx.page_size)()),
             None,
-            Some(5),
+            Some(10),
         )
     })?;
 
