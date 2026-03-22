@@ -41,8 +41,12 @@ pub enum Route {
                     page: Option<u32>,
                     size: Option<u32>,
                 },
-                #[route("/:owner/:name")]
-                RepoDetailView { owner: String, name: String },
+                #[route("/:owner/:name?:metric")]
+                RepoDetailView {
+                    owner: String,
+                    name: String,
+                    metric: Option<String>,
+                },
             #[end_nest]
             #[route("/tag")]
             TagListView {},

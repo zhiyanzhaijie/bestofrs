@@ -6,9 +6,21 @@ use crate::components::ui::hover_card::{HoverCard, HoverCardContent, HoverCardTr
 use crate::root::Route;
 use crate::types::repos::RepoDto;
 use dioxus::prelude::*;
+use super::super::super::{RepoListContext, SortType};
 
 #[component]
-pub(super) fn RepoManuscriptCard(repo: RepoDto, on_open: Option<EventHandler<String>>) -> Element {
+pub(super) fn RepoManuscriptCard(
+    repo: RepoDto,
+    on_open: Option<EventHandler<String>>,
+) -> Element {
+    let ctx = use_context::<RepoListContext>();
+    let metric = match (ctx.sort_type)() {
+        SortType::Star => Some("star".to_string()),
+        SortType::Fork => Some("fork".to_string()),
+        SortType::Issue => Some("issue".to_string()),
+        SortType::AddTime => None,
+    };
+
     let RepoDto {
         id,
         stars,
@@ -36,6 +48,7 @@ pub(super) fn RepoManuscriptCard(repo: RepoDto, on_open: Option<EventHandler<Str
         Route::RepoDetailView {
             owner: owner.to_string(),
             name: name.to_string(),
+            metric,
         }
     };
     let anchor_id = repo_anchor_id(&id);

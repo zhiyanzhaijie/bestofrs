@@ -39,7 +39,7 @@ fn build_crumbs(route: &Route) -> Vec<Crumb> {
     match route {
         Route::HomeView {} => vec![home_crumb()],
         Route::RepoListView { .. } => vec![home_crumb(), repo_crumb()],
-        Route::RepoDetailView { owner, name } => vec![
+        Route::RepoDetailView { owner, name, .. } => vec![
             home_crumb(),
             repo_crumb(),
             Crumb {

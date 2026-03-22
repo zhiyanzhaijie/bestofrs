@@ -14,16 +14,20 @@ pub(crate) fn DeltaContent() -> Element {
     let ctx = use_context::<RepoDetailContext>();
     let trend_ctx = use_context::<TrendContext>();
     let delta_timeframe = trend_ctx.delta_timeframe;
-    let deltas_fut = use_server_future(move || {
-        let duration = if delta_timeframe() == "weekly" {
-            DurationRange::Weekly
-        } else {
-            DurationRange::Monthly
-        };
-        list_repo_deltas_in_duration((ctx.owner)(), (ctx.name)(), duration)
+    let weekly_fut = use_server_future(move || {
+        list_repo_deltas_in_duration((ctx.owner)(), (ctx.name)(), DurationRange::Weekly)
+    })?;
+    let monthly_fut = use_server_future(move || {
+        list_repo_deltas_in_duration((ctx.owner)(), (ctx.name)(), DurationRange::Monthly)
     })?;
 
-    match deltas_fut() {
+    let selected = if delta_timeframe() == "weekly" {
+        weekly_fut()
+    } else {
+        monthly_fut()
+    };
+
+    match selected {
         Some(Ok(page)) => rsx! { DeltaChartContent { page: page.clone() } },
         Some(Err(e)) => Err(e)?,
         None => rsx! { skeleton::DeltaContentSkeleton {} },
@@ -36,21 +40,16 @@ fn DeltaChartContent(page: Page<SnapshotDeltaDto>) -> Element {
     let trend_ctx = use_context::<TrendContext>();
     let metric = trend_ctx.metric;
     let delta_timeframe = trend_ctx.delta_timeframe;
+    let active_tab = trend_ctx.active_tab;
 
     let chart_id_memo = use_memo({
         let owner = ctx.owner;
         let name = ctx.name;
-        let delta_timeframe = delta_timeframe;
-        move || {
-            let timeframe = delta_timeframe();
-            chart_dom_id(&owner(), &name(), &format!("delta-{timeframe}"))
-        }
+        move || chart_dom_id(&owner(), &name(), "delta")
     });
 
     let chart_config_memo = use_memo({
         let page = page.clone();
-        let metric = metric;
-        let delta_timeframe = delta_timeframe;
         move || {
             let current_metric = metric();
             let _current_timeframe = delta_timeframe();
@@ -81,6 +80,8 @@ fn DeltaChartContent(page: Page<SnapshotDeltaDto>) -> Element {
 
     let id: ReadSignal<String> = chart_id_memo.into();
     let chart_config: ReadSignal<serde_json::Value> = chart_config_memo.into();
+    let is_active = use_memo(move || active_tab().as_deref() == Some("delta"));
+    let is_active: ReadSignal<bool> = is_active.into();
 
     rsx! {
         div { class: "flex h-full flex-col gap-2",
@@ -91,6 +92,7 @@ fn DeltaChartContent(page: Page<SnapshotDeltaDto>) -> Element {
                     ChartJsCanvas {
                         id,
                         config: chart_config,
+                        active: is_active,
                     }
                 }
             }

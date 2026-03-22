@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use dioxus_use_js::use_js;
 use serde_json::{json, Value};
 
-use_js!("src/js/chart_bridge.js"::create_chart);
+use_js!("src/js/chart_bridge.js"::upsert_chart);
 
 pub(super) fn chart_dom_id(owner: &str, name: &str, suffix: &str) -> String {
     let owner = owner
@@ -39,8 +39,8 @@ pub(super) fn build_trend_chart_config(
                 {
                     "label": "STARS",
                     "data": stars_series,
-                    "borderColor": "#2563eb",
-                    "backgroundColor": "rgba(37, 99, 235, 0.15)",
+                    "borderColor": "#10b981",
+                    "backgroundColor": "rgba(16, 185, 129, 0.15)",
                     "borderWidth": 2,
                     "pointRadius": 0,
                     "tension": 0.25
@@ -66,8 +66,8 @@ pub(super) fn build_trend_chart_config(
                 {
                     "label": "WATCHERS",
                     "data": watchers_series,
-                    "borderColor": "#10b981",
-                    "backgroundColor": "rgba(16, 185, 129, 0.15)",
+                    "borderColor": "#2563eb",
+                    "backgroundColor": "rgba(37, 99, 235, 0.15)",
                     "borderWidth": 2,
                     "pointRadius": 0,
                     "tension": 0.25
@@ -160,24 +160,23 @@ pub(super) fn build_delta_chart_config(
     })
 }
 
-const CHART_JS_CDN: &str = "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js";
-
 #[component]
 pub(super) fn ChartJsCanvas(
     id: ReadSignal<String>,
     config: ReadSignal<Value>,
+    active: ReadSignal<bool>,
     #[props(default = String::from(""))] class: String,
 ) -> Element {
     use_effect(move || {
         let id = id();
         let config = config();
+        let active = active();
         spawn(async move {
-            let _ = create_chart::<()>(id, config).await;
+            let _ = upsert_chart::<()>(id, config, active).await;
         });
     });
 
     rsx! {
-        document::Script { src: CHART_JS_CDN, r#type: "module" },
         div { class: "border border-primary-6 bg-primary-1 p-3 h-80 {class}",
             canvas { class: "w-full h-full", id: "{id()}" }
         }

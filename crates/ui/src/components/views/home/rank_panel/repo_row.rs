@@ -18,7 +18,7 @@ pub(super) struct HomeRankRepoRowProps {
 
 #[component]
 pub(super) fn HomeRankRepoRow(props: HomeRankRepoRowProps) -> Element {
-    let route = parse_repo_route(&props.repo.id);
+    let route = parse_repo_route(&props.repo.id, props.active_tab);
     let stat_text = stat_value(&props.repo, props.active_tab);
     let accent_color = rainbow_color(props.idx);
     let tag_items = props.repo.tags.iter().take(3).cloned().collect::<Vec<_>>();

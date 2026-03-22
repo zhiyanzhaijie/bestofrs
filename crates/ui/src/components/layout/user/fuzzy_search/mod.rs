@@ -40,6 +40,7 @@ fn repo_route(repo: &SearchRepoDto) -> Route {
         Some((owner, name)) => Route::RepoDetailView {
             owner: owner.to_string(),
             name: name.to_string(),
+            metric: None,
         },
         None => Route::HomeView {},
     }

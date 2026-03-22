@@ -45,7 +45,11 @@ pub fn MiniRepoCard(repo: TagTopRepoDto) -> Element {
                 onmouseleave: move |_| is_hovered.set(false),
                 Link {
                     class: "contents",
-                    to: Route::RepoDetailView { owner, name },
+                    to: Route::RepoDetailView {
+                        owner,
+                        name,
+                        metric: None,
+                    },
                     div {
                         class: "{plate_base_class}",
                         class: if is_hovered() { "border-[var(--grid-accent)]" } else { "border-primary-6" },

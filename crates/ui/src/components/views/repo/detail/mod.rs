@@ -27,7 +27,11 @@ pub(super) struct RepoDetailContext {
 }
 
 #[component]
-pub fn RepoDetail(owner: ReadSignal<String>, name: ReadSignal<String>) -> Element {
+pub fn RepoDetail(
+    owner: ReadSignal<String>,
+    name: ReadSignal<String>,
+    metric: ReadSignal<Option<String>>,
+) -> Element {
     use_context_provider(|| RepoDetailContext { owner, name });
 
     rsx! {
@@ -50,7 +54,7 @@ pub fn RepoDetail(owner: ReadSignal<String>, name: ReadSignal<String>) -> Elemen
             GridSlashTransition {}
             GridWrapper { padding: GridPadding::Sm,
                 section { class: "space-y-8",
-                    TrendSection {}
+                    TrendSection { initial_metric: metric }
                     IOCell {
                         loading_fallback: rsx! {
                             ReadmeSectionSkeleton {}

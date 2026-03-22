@@ -17,16 +17,20 @@ pub(crate) fn SnapshotContent() -> Element {
     let ctx = use_context::<RepoDetailContext>();
     let trend_ctx = use_context::<TrendContext>();
     let snapshot_timeframe = trend_ctx.snapshot_timeframe;
-    let snapshots_fut = use_server_future(move || {
-        let duration = if snapshot_timeframe() == "yearly" {
-            DurationRange::Yearly
-        } else {
-            DurationRange::Monthly
-        };
-        list_repo_snapshots_in_duration((ctx.owner)(), (ctx.name)(), duration)
+    let monthly_fut = use_server_future(move || {
+        list_repo_snapshots_in_duration((ctx.owner)(), (ctx.name)(), DurationRange::Monthly)
+    })?;
+    let yearly_fut = use_server_future(move || {
+        list_repo_snapshots_in_duration((ctx.owner)(), (ctx.name)(), DurationRange::Yearly)
     })?;
 
-    match snapshots_fut() {
+    let selected = if snapshot_timeframe() == "yearly" {
+        yearly_fut()
+    } else {
+        monthly_fut()
+    };
+
+    match selected {
         Some(Ok(page)) => rsx! { SnapshotChartContent { page: page.clone() } },
         Some(Err(e)) => Err(e)?,
         None => rsx! { skeleton::SnapshotContentSkeleton {} },
@@ -39,15 +43,12 @@ fn SnapshotChartContent(page: Page<SnapshotDto>) -> Element {
     let trend_ctx = use_context::<TrendContext>();
     let metric = trend_ctx.metric;
     let snapshot_timeframe = trend_ctx.snapshot_timeframe;
+    let active_tab = trend_ctx.active_tab;
 
     let chart_id_memo = use_memo({
         let owner = ctx.owner;
         let name = ctx.name;
-        let snapshot_timeframe = snapshot_timeframe;
-        move || {
-            let timeframe = snapshot_timeframe();
-            chart_dom_id(&owner(), &name(), &format!("trend-{timeframe}"))
-        }
+        move || chart_dom_id(&owner(), &name(), "trend")
     });
 
     let chart_config_memo = use_memo({
@@ -147,6 +148,8 @@ fn SnapshotChartContent(page: Page<SnapshotDto>) -> Element {
 
     let id: ReadSignal<String> = chart_id_memo.into();
     let chart_config: ReadSignal<serde_json::Value> = chart_config_memo.into();
+    let is_active = use_memo(move || active_tab().as_deref() == Some("snapshot"));
+    let is_active: ReadSignal<bool> = is_active.into();
 
     rsx! {
         div { class: "flex h-full flex-col gap-2",
@@ -157,6 +160,7 @@ fn SnapshotChartContent(page: Page<SnapshotDto>) -> Element {
                     ChartJsCanvas {
                         id,
                         config: chart_config,
+                        active: is_active,
                     }
                 }
             }

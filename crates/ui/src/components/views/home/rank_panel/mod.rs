@@ -182,15 +182,13 @@ pub(super) fn map_rank_repo(repo: RepoDto) -> HomeRankRepo {
         tags: repo
             .tags
             .iter()
-            .map(|tag| {
-                HomeRankTag {
-                    label: if tag.label.is_empty() {
-                        tag.value.clone()
-                    } else {
-                        tag.label.clone()
-                    },
-                    value: tag.value.clone(),
-                }
+            .map(|tag| HomeRankTag {
+                label: if tag.label.is_empty() {
+                    tag.value.clone()
+                } else {
+                    tag.label.clone()
+                },
+                value: tag.value.clone(),
             })
             .collect(),
         avatar_url,
@@ -210,14 +208,21 @@ fn fallback_avatar(repo_id: &str) -> String {
     "https://github.com/github.png".to_string()
 }
 
-pub(super) fn parse_repo_route(repo_id: &str) -> Option<Route> {
+pub(super) fn parse_repo_route(repo_id: &str, metric_tab: RankType) -> Option<Route> {
     let (owner, name) = repo_id.split_once('/')?;
     if owner.is_empty() || name.is_empty() {
         return None;
     }
+    let metric = match metric_tab {
+        RankType::Star => Some("star".to_string()),
+        RankType::Fork => Some("fork".to_string()),
+        RankType::Issue => Some("issue".to_string()),
+        RankType::Recent => None,
+    };
     Some(Route::RepoDetailView {
         owner: owner.to_string(),
         name: name.to_string(),
+        metric,
     })
 }
 

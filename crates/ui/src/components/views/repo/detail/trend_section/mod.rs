@@ -19,20 +19,21 @@ pub(super) struct TrendContext {
     pub(super) metric: Signal<String>,
     pub(super) delta_timeframe: Signal<String>,
     pub(super) snapshot_timeframe: Signal<String>,
+    pub(super) active_tab: Signal<Option<String>>,
 }
 
 fn metric_dataset_label(metric: &str, chart_kind: &str) -> &'static str {
     match chart_kind {
         "delta" => match metric {
-            "forks" => "forks_delta",
-            "issues" => "open_issues_delta",
-            _ => "stars_delta",
+            "forks" => "ΔFORKS",
+            "issues" => "ΔISSUES",
+            _ => "ΔSTARS",
         },
         _ => match metric {
-            "forks" => "forks",
-            "issues" => "open_issues",
-            "watchers" => "watchers",
-            _ => "stars",
+            "forks" => "FORKS",
+            "issues" => "ISSUES",
+            "watchers" => "WATCHERS",
+            _ => "STARS",
         },
     }
 }
@@ -58,18 +59,28 @@ pub(super) fn apply_metric_visibility(mut config: Value, metric: &str, chart_kin
     config
 }
 
+fn normalize_metric(metric: Option<&str>) -> String {
+    match metric.unwrap_or_default().trim().to_lowercase().as_str() {
+        "fork" | "forks" => "forks".to_string(),
+        "issue" | "issues" => "issues".to_string(),
+        "star" | "stars" => "stars".to_string(),
+        _ => "stars".to_string(),
+    }
+}
 
 #[component]
-pub(crate) fn TrendSection() -> Element {
-    let metric = use_signal(|| "stars".to_string());
+pub(crate) fn TrendSection(initial_metric: ReadSignal<Option<String>>) -> Element {
+    let metric = use_signal(move || normalize_metric(initial_metric().as_deref()));
     let mut delta_timeframe = use_signal(|| "weekly".to_string());
     let mut snapshot_timeframe = use_signal(|| "monthly".to_string());
+    let mut active_tab = use_signal(|| Some("delta".to_string()));
+
     use_context_provider(|| TrendContext {
         metric,
         delta_timeframe,
         snapshot_timeframe,
+        active_tab,
     });
-    let mut active_tab = use_signal(|| Some("delta".to_string()));
     let active_tab_read: ReadSignal<Option<String>> = active_tab.into();
 
     rsx! {
@@ -118,9 +129,11 @@ pub(crate) fn TrendSection() -> Element {
                         }
                     }
                     div { class: "min-h-0 flex-1",
-                        IOCell {
-                            loading_fallback: rsx! { DeltaContentSkeleton {} },
-                            DeltaContent {}
+                        div { key: "delta-{delta_timeframe()}",
+                            IOCell {
+                                loading_fallback: rsx! { DeltaContentSkeleton {} },
+                                DeltaContent {}
+                            }
                         }
                     }
                 }
@@ -153,9 +166,11 @@ pub(crate) fn TrendSection() -> Element {
                         }
                     }
                     div { class: "min-h-0 flex-1",
-                        IOCell {
-                            loading_fallback: rsx! { SnapshotContentSkeleton {} },
-                            SnapshotContent {}
+                        div { key: "snapshot-{snapshot_timeframe()}",
+                            IOCell {
+                                loading_fallback: rsx! { SnapshotContentSkeleton {} },
+                                SnapshotContent {}
+                            }
                         }
                     }
                 }
