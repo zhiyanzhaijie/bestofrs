@@ -1,11 +1,10 @@
 use dioxus::prelude::*;
 
 use crate::{
-    components::{common::LottieWebComp, icons::RustGearIcon},
+    components::icons::RustGearIcon,
     IO::health::today,
 };
 
-const LOTTIE_GEAR_ASSET: Asset = asset!("/assets/ferris-gear.lottie");
 const VIEW_W: f32 = 1000.0;
 const VIEW_H: f32 = 700.0;
 
@@ -20,7 +19,6 @@ struct GearItem {
     rotation_deg: f32,
     spin_seconds: f32,
     clockwise: bool,
-    is_lottie: bool,
 }
 
 #[component]
@@ -47,11 +45,6 @@ pub fn GearMap(
                 div {
                     key: "{idx}",
                     class: "gear-item",
-                    class: if gear.is_lottie {
-                        "gear-lottie-drop-in"
-                    } else {
-                        ""
-                    },
                     style: "--gear-left-pct: {gear.left_pct:.2}%; --gear-top-pct: {gear.top_pct:.2}%; --gear-size-pct: {gear.size_pct:.3}%; --gear-rotation-deg: {gear.rotation_deg:.1}deg;",
                     div {
                         class: "animate-spin gear-spin gear-spin-delayed",
@@ -63,15 +56,9 @@ pub fn GearMap(
                         style: "--gear-spin-seconds: {gear.spin_seconds:.1}s;",
                         div {
                             class: "gear-visual",
-                            if gear.is_lottie {
-                                LottieWebComp {
-                                    src: LOTTIE_GEAR_ASSET.to_string(),
-                                }
-                            } else {
-                                RustGearIcon {
-                                    width: gear.size,
-                                    style: "width: 100%; height: 100%; display: block;",
-                                }
+                            RustGearIcon {
+                                width: gear.size,
+                                style: "width: 100%; height: 100%; display: block;",
                             }
                         }
                     }
@@ -88,7 +75,6 @@ fn generate_gears(count: usize, seed: u64) -> Vec<GearItem> {
 
     let mut state = seed ^ 0x9E37_79B9_7F4A_7C15;
     let mut items: Vec<GearItem> = Vec::with_capacity(count);
-    let lottie_index = count.saturating_sub(1);
 
     let lane_pattern: [usize; 10] = [0, 0, 0, 0, 1, 2, 3, 4, 0, 0];
     let lane_phase = (next_u32(&mut state) as usize) % lane_pattern.len();
@@ -165,7 +151,6 @@ fn generate_gears(count: usize, seed: u64) -> Vec<GearItem> {
             }
         }
 
-        let is_lottie = i == lottie_index;
         let (mut x, mut y) = placed.unwrap_or_else(|| match lane {
             0 => (
                 along_x.clamp(VIEW_W * 0.04, VIEW_W * 0.96),
@@ -191,11 +176,7 @@ fn generate_gears(count: usize, seed: u64) -> Vec<GearItem> {
         let safe = radius * 1.08;
         x = x.clamp(safe, VIEW_W - safe);
         y = y.clamp(safe, VIEW_H - safe);
-        let rotation_deg = if is_lottie {
-            0.0
-        } else {
-            lerp(-20.0, 20.0, next_f32(&mut state))
-        };
+        let rotation_deg = lerp(-20.0, 20.0, next_f32(&mut state));
         let clockwise = i % 2 == 0;
 
         items.push(GearItem {
@@ -208,7 +189,6 @@ fn generate_gears(count: usize, seed: u64) -> Vec<GearItem> {
             rotation_deg,
             spin_seconds: lerp(44.0, 86.0, next_f32(&mut state)),
             clockwise,
-            is_lottie,
         });
     }
 
