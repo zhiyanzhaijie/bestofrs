@@ -8,22 +8,101 @@ export async function blur_active_element() {
     activeElement.blur();
   }
 }
-export async function mount_fuzzy_search_hotkey(trigger_id, drop) {
-  function fuzzySearchKeyHandler(event) {
-    const key = (event.key || "").toLowerCase();
-    if (key === "k" && (event.metaKey || event.ctrlKey)) {
-      event.preventDefault();
-      const trigger = document.getElementById(trigger_id);
-      if (trigger && typeof trigger.click === "function") {
-        trigger.click();
+
+function ensureFuzzySearchHotkeyStore() {
+  const key = "__bestofrs_fuzzy_hotkey_store";
+  const store = window[key];
+  if (store) {
+    return store;
+  }
+
+  const nextStore = {
+    triggerIdCounts: new Map(),
+    keyHandler: null,
+  };
+  window[key] = nextStore;
+  return nextStore;
+}
+
+function normalizeTriggerIds(triggerIdsOrId) {
+  if (Array.isArray(triggerIdsOrId)) {
+    return triggerIdsOrId.filter(Boolean);
+  }
+  if (typeof triggerIdsOrId === "string" && triggerIdsOrId.length > 0) {
+    return [triggerIdsOrId];
+  }
+  return [];
+}
+
+function isVisible(element) {
+  if (!element) {
+    return false;
+  }
+  const style = window.getComputedStyle(element);
+  if (style.display === "none" || style.visibility === "hidden") {
+    return false;
+  }
+  return element.getClientRects().length > 0;
+}
+
+function pickTrigger(store) {
+  for (const id of store.triggerIdCounts.keys()) {
+    const triggers = document.querySelectorAll(`[id="${id}"]`);
+    for (const trigger of triggers) {
+      if (isVisible(trigger)) {
+        return trigger;
       }
     }
   }
+  for (const id of store.triggerIdCounts.keys()) {
+    const triggers = document.querySelectorAll(`[id="${id}"]`);
+    for (const trigger of triggers) {
+      return trigger;
+    }
+  }
+  return null;
+}
 
-  window.addEventListener("keydown", fuzzySearchKeyHandler);
+export async function mount_fuzzy_search_hotkey(trigger_ids_or_id, drop) {
+  const store = ensureFuzzySearchHotkeyStore();
+  const triggerIds = normalizeTriggerIds(trigger_ids_or_id);
+
+  for (const id of triggerIds) {
+    const prev = store.triggerIdCounts.get(id) || 0;
+    store.triggerIdCounts.set(id, prev + 1);
+  }
+
+  if (!store.keyHandler) {
+    store.keyHandler = function fuzzySearchKeyHandler(event) {
+      const key = (event.key || "").toLowerCase();
+      if (key !== "k" || (!event.metaKey && !event.ctrlKey)) {
+        return;
+      }
+
+      event.preventDefault();
+      const trigger = pickTrigger(store);
+      if (trigger && typeof trigger.click === "function") {
+        trigger.click();
+      }
+    };
+
+    window.addEventListener("keydown", store.keyHandler);
+  }
 
   drop.then(() => {
-    window.removeEventListener("keydown", fuzzySearchKeyHandler);
+    for (const id of triggerIds) {
+      const prev = store.triggerIdCounts.get(id) || 0;
+      if (prev <= 1) {
+        store.triggerIdCounts.delete(id);
+      } else {
+        store.triggerIdCounts.set(id, prev - 1);
+      }
+    }
+
+    if (store.triggerIdCounts.size === 0 && store.keyHandler) {
+      window.removeEventListener("keydown", store.keyHandler);
+      store.keyHandler = null;
+    }
   });
 }
 
