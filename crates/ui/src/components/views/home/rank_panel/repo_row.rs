@@ -31,6 +31,7 @@ pub(super) fn HomeRankRepoRow(props: HomeRankRepoRowProps) -> Element {
     rsx! {
         div {
             class: "rank-card relative flex items-start rounded-xl border-l-4 border-y border-r border-primary-6 bg-primary p-2 shadow-sm transition-all duration-300 group md:h-[86px] md:items-center md:rounded-2xl md:p-3",
+            class: "hover:cursor-pointer",
             style: "{row_border_style(props.idx)} --rank-accent: {accent_color};",
             onclick: move |_| {
                 navigator.push(route.clone());
