@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 use super::gearmap::GearMap;
 use crate::{
     components::common::IOCell,
-    components::icons::{BORSFerrisIcon, DioxusIcon, FerrisIcon, HeartIcon},
+    components::icons::{BORSFerrisIcon, DioxusIcon, HeartIcon},
     root::Route,
 };
 
