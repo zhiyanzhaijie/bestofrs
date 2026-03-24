@@ -7,7 +7,9 @@ use dioxus::prelude::*;
 pub fn Login() -> Element {
     let navigator = use_navigator();
     use_effect(move || {
-        navigator.push("/api/auth/login/github");
+        navigator.replace(NavigationTarget::<String>::External(
+            "/api/auth/login/github".to_string(),
+        ));
     });
 
     rsx! {
