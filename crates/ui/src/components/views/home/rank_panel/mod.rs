@@ -94,7 +94,7 @@ pub(super) fn HomeRankPanel() -> Element {
 
     rsx! {
         div { class: "relative z-10 flex min-h-0 flex-col overflow-visible rounded-3xl border-2 border-primary-6 bg-primary shadow-2xl transition-colors duration-300 md:rounded-[3rem] lg:min-h-[600px] lg:flex-row lg:rounded-[3.5rem] lg:border-x-4",
-            div { class: "flex w-full flex-col self-stretch border-b border-primary-6 bg-primary p-3 md:p-4 lg:w-[260px] lg:flex-none lg:border-b-0 lg:border-r",
+            div { class: "flex w-full flex-col self-stretch overflow-hidden rounded-t-[calc(1.5rem-2px)] border-b border-primary-6 bg-primary p-3 md:rounded-t-[calc(3rem-2px)] md:p-4 lg:w-[260px] lg:flex-none lg:rounded-t-none lg:rounded-l-[calc(3.5rem-4px)] lg:border-b-0 lg:border-r",
                 div { class: "mb-2 flex items-center justify-center gap-2 p-2 text-center md:p-4",
                     RustDEVIcon {  width: 40.0, height: 40.0 }
                     div {

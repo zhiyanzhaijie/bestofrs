@@ -43,11 +43,11 @@ pub fn Home() -> Element {
                     }
                     div {
                         class: "absolute inset-y-0 left-0 w-1/2 z-10",
-                        style: "background: linear-gradient(to right, var(--primary-color), color-mix(in oklab, var(--primary-color) 90%, transparent), transparent);",
+                        style: "background: linear-gradient(to right, color-mix(in oklab, var(--primary-color-3) 88%, transparent), color-mix(in oklab, var(--primary-color-2) 42%, transparent), transparent);",
                     }
                     div {
                         class: "absolute inset-y-0 right-0 md:w-1/6 z-10",
-                        style: "background: linear-gradient(to left, var(--primary-color), color-mix(in oklab, var(--primary-color) 90%, transparent), transparent);",
+                        style: "background: linear-gradient(to left, color-mix(in oklab, var(--primary-color-3) 88%, transparent), color-mix(in oklab, var(--primary-color-2) 42%, transparent), transparent);",
                     }
                     div {
                         class: "absolute inset-x-0 top-0 h-32 z-10",
