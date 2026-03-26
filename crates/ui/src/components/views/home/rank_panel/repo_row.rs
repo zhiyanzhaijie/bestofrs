@@ -64,7 +64,7 @@ pub(super) fn HomeRankRepoRow(props: HomeRankRepoRowProps) -> Element {
                 }
                 div { class: "mt-1.5 hidden min-h-[18px] flex-wrap items-center gap-1 sm:flex",
                     for tag in tag_items {
-                        HoverCard { key: "{tag.value}",
+                        HoverCard { key: "{props.repo.id}-{tag.value}",
                             HoverCardTrigger {
                                 button {
                                     r#type: "button",
