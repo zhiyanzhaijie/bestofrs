@@ -10,7 +10,7 @@ pub(super) mod skeleton;
 
 use super::{
     filter_range, sort_metric, FilterType, ListSummary, RepoListCachedPage, RepoListContext,
-    RepoListHeroType, SortType,
+    RepoListHeroType,
 };
 use repo_list_content::RepoListContent;
 
@@ -27,15 +27,10 @@ pub(super) fn RepoListIO() -> Element {
             limit: Some(limit),
             offset: Some(limit.saturating_mul(page.saturating_sub(1))),
         };
-        let is_default_query = filter_type == FilterType::Total && sort_type == SortType::Star;
         let query = RepoListQuery {
             page: page_query,
-            metric: if is_default_query {
-                None
-            } else {
-                Some(sort_metric(sort_type))
-            },
-            range: if is_default_query {
+            metric: Some(sort_metric(sort_type)),
+            range: if filter_type == FilterType::Total {
                 None
             } else {
                 Some(filter_range(filter_type))

@@ -7,8 +7,8 @@ use domain::{Repo, RepoId, RepoWithTags, Tag};
 use crate::app_error::AppResult;
 use crate::common::{Page, Pagination};
 use crate::repo::{
-    GithubGateway, RepoRankQuery, RepoRepo, RepoSearchCache, RepoTagFacet, RepoTagListItem,
-    RepoTagRepo,
+    GithubGateway, RepoRankMetric, RepoRankQuery, RepoRepo, RepoSearchCache, RepoTagFacet,
+    RepoTagListItem, RepoTagRepo,
 };
 
 #[derive(Debug, Clone)]
@@ -86,6 +86,7 @@ impl RepoQueryHandler {
         &self,
         page: Pagination,
         active_tag_values: Option<Vec<String>>,
+        metric: Option<RepoRankMetric>,
     ) -> AppResult<Page<RepoWithTags>> {
         let mut dedup = BTreeSet::new();
         let mut normalized_values = Vec::new();
@@ -161,28 +162,26 @@ impl RepoQueryHandler {
                     };
                 }
 
-                let mut matched_repo_ids = matched_repo_ids
+                let matched_repo_ids = matched_repo_ids
                     .unwrap_or_default()
                     .into_iter()
-                    .collect::<Vec<_>>();
-                matched_repo_ids.sort();
-                let total = matched_repo_ids.len() as u64;
-
-                let offset = page.offset() as usize;
-                let limit = page.limit() as usize;
-                let page_repo_ids = matched_repo_ids
-                    .into_iter()
-                    .skip(offset)
-                    .take(limit)
                     .map(RepoId::new_unchecked)
                     .collect::<Vec<_>>();
-
-                let mut repos = Vec::with_capacity(page_repo_ids.len());
-                for repo_id in &page_repo_ids {
-                    if let Some(repo) = self.repos.get(repo_id).await? {
-                        repos.push(repo);
-                    }
-                }
+                let mut repos = self.repos.list_by_ids(&matched_repo_ids).await?;
+                let metric = metric.unwrap_or(RepoRankMetric::Star);
+                repos.sort_by(|a, b| {
+                    let order = match metric {
+                        RepoRankMetric::Star => b.stars.cmp(&a.stars),
+                        RepoRankMetric::Fork => b.forks.cmp(&a.forks),
+                        RepoRankMetric::Issue => b.open_issues.cmp(&a.open_issues),
+                        RepoRankMetric::Recent => b.created_at.cmp(&a.created_at),
+                    };
+                    order.then_with(|| a.id.as_str().cmp(b.id.as_str()))
+                });
+                let total = repos.len() as u64;
+                let offset = page.offset() as usize;
+                let limit = page.limit() as usize;
+                let repos = repos.into_iter().skip(offset).take(limit).collect::<Vec<_>>();
 
                 Page {
                     items: repos,
