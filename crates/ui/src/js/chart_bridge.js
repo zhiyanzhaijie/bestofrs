@@ -7,6 +7,15 @@ async function wait_canvas(canvas_id, attempts = 400) {
   return null;
 }
 
+async function wait_chart(attempts = 400) {
+  for (let i = 0; i < attempts; i += 1) {
+    const Chart = window.Chart;
+    if (Chart) return Chart;
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+  }
+  return null;
+}
+
 const chart_by_id = new Map();
 const upsert_version_by_id = new Map();
 
@@ -51,8 +60,8 @@ function upsert_chart_instance(chart, context, config, Chart) {
 export async function upsert_chart(canvas_id, config) {
   const version = begin_upsert(canvas_id);
 
-  const Chart = window.Chart;
-  if (!Chart) throw new Error("Chart.js is not available on window.Chart");
+  const Chart = await wait_chart();
+  if (!Chart) return null;
   if (!is_current_upsert(canvas_id, version)) return null;
 
   const canvas = await wait_canvas(canvas_id);
