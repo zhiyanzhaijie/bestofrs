@@ -15,6 +15,13 @@ pub struct Project {
     pub description: String,
     pub url: Option<String>,
     pub avatar_url: Option<String>,
-    pub status: Option<String>,
+    pub status: ProjectStatus,
     pub twitter: Option<String>,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+pub enum ProjectStatus {
+    Active,
+    Disabled,
+    Unknown,
 }

@@ -5,7 +5,9 @@ mod search;
 
 use dioxus::prelude::*;
 
-use crate::components::common::{CommonPagination, GridSlashTransition, GridType, GridWrapper, IOCell};
+use crate::components::common::{
+    CommonPagination, GridSlashTransition, GridType, GridWrapper, IOCell,
+};
 use context::{ProjectPanelMode, ProjectTablePaginationState, ProjectsContext};
 use edit_panel::EditPanel;
 use project_table::skeleton::ProjectTableSkeleton;

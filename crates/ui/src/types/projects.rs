@@ -1,4 +1,4 @@
-use domain::Project;
+use domain::{Project, ProjectStatus};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -10,7 +10,7 @@ pub struct ProjectDto {
     pub repo_id: String,
     pub url: Option<String>,
     pub avatar_url: Option<String>,
-    pub status: Option<String>,
+    pub status: ProjectStatus,
     pub twitter: Option<String>,
     #[serde(default)]
     pub tags: Vec<String>,
@@ -46,7 +46,7 @@ pub struct ProjectImportItem {
     pub url: Option<String>,
     pub avatar_url: Option<String>,
 
-    pub status: Option<String>,
+    pub status: ProjectStatus,
     pub twitter: Option<String>,
     #[serde(default)]
     pub tags: Option<Vec<String>>,

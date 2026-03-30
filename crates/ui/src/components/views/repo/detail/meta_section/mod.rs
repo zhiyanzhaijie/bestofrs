@@ -12,6 +12,7 @@ use crate::components::ui::avatar::AvatarImageSize;
 use crate::impls::datetime::format_utc_ymd_hms;
 use crate::root::Route;
 use crate::IO::repos::get_repo;
+use domain::ProjectStatus;
 
 use super::RepoDetailContext;
 
@@ -28,19 +29,18 @@ pub(crate) fn MetaSection() -> Element {
     let owner = owner();
     let name = name();
 
-    let repo_data = match repo_fut() {
-        Some(Ok(Some(r))) => Some(r),
-        _ => None,
+    let Some(Ok(Some(repo_data))) = repo_fut() else {
+        return rsx! { skeleton::MetaSectionSkeleton {} };
     };
 
     let github_url = format!("https://github.com/{owner}/{name}");
-    let homepage_url = repo_data.as_ref().and_then(|r| r.homepage_url.clone());
+    let homepage_url = repo_data.homepage_url.clone();
+    let is_disabled = matches!(repo_data.project_status, Some(ProjectStatus::Disabled));
+    let description = repo_data.description.clone();
+    let last_fetched_at = repo_data.last_fetched_at.clone();
 
     // SEO part
-    let seo_description = repo_data
-        .as_ref()
-        .and_then(|r| r.description.clone())
-        .unwrap_or_else(|| {
+    let seo_description = repo_data.description.clone().unwrap_or_else(|| {
             t!(
                 "view_repo_detail_meta_seo_description_fallback",
                 owner: owner.clone(),
@@ -49,30 +49,21 @@ pub(crate) fn MetaSection() -> Element {
             .to_string()
         });
 
-    let seo_keywords = repo_data
-        .as_ref()
-        .map(|r| {
-            let tag_values = r
-                .tags
-                .iter()
-                .map(|t| t.value.clone())
-                .collect::<Vec<_>>()
-                .join(", ");
-            if tag_values.is_empty() {
-                "best of rs, rust repository, github rust, rust trends, community health"
-                    .to_string()
-            } else {
-                format!("best of rs, rust repository, {}", tag_values)
-            }
-        })
-        .unwrap_or_else(|| {
+    let seo_keywords = {
+        let tag_values = repo_data
+            .tags
+            .iter()
+            .map(|t| t.value.clone())
+            .collect::<Vec<_>>()
+            .join(", ");
+        if tag_values.is_empty() {
             "best of rs, rust repository, github rust, rust trends, community health".to_string()
-        });
+        } else {
+            format!("best of rs, rust repository, {}", tag_values)
+        }
+    };
     let canonical_url = format!("/repo/{owner}/{name}");
-    let avatar_candidates = repo_data
-        .as_ref()
-        .map(|repo| repo.avatar_urls.clone())
-        .unwrap_or_default();
+    let avatar_candidates = repo_data.avatar_urls.clone();
 
     rsx! {
         SEOHead {
@@ -108,14 +99,21 @@ pub(crate) fn MetaSection() -> Element {
                                 }
                                 div { class: "flex min-w-0 flex-1 flex-col items-center gap-4 text-center md:items-start md:text-left",
                                     div {
-                                        h1 { class: "break-all text-3xl leading-none font-black tracking-tighter text-secondary-2 uppercase md:text-7xl",
-                                            "{name}"
+                                        div { class: "flex flex-wrap items-center justify-center gap-x-3 gap-y-2 md:justify-start",
+                                            h1 { class: "break-all text-3xl leading-none font-black tracking-tighter text-secondary-2 uppercase md:text-7xl",
+                                                "{name}"
+                                            }
+                                            if is_disabled {
+                                                span { class: "inline-flex items-center border border-secondary-2 bg-secondary-2 px-2 py-1 font-mono text-[10px] font-bold tracking-[0.18em] text-primary uppercase md:px-3 md:py-1.5 md:text-xs",
+                                                    "Disabled"
+                                                }
+                                            }
                                         }
                                         div { class: "mt-1.5 text-center font-mono text-[10px] font-bold tracking-widest text-grid-accent uppercase md:mt-2 md:text-left md:text-sm",
                                             "{owner}/{name}"
                                         }
                                     }
-                                    if let Some(desc) = repo_data.as_ref().and_then(|r| r.description.clone()) {
+                                    if let Some(desc) = description {
                                         p { class: "w-full max-w-3xl text-left font-mono text-xs leading-relaxed text-secondary-4 md:text-base",
                                             span { class: "mr-2 font-bold text-grid-accent",
                                                 ">"
@@ -126,81 +124,79 @@ pub(crate) fn MetaSection() -> Element {
                                 }
                             }
 
-                            if let Some(date) = repo_data.as_ref().and_then(|r| r.last_fetched_at.clone()) {
+                            if let Some(date) = last_fetched_at {
                                 div { class: "font-mono text-[9px] tracking-widest text-secondary-6 uppercase md:text-[10px]",
                                     "{t!(\"view_repo_detail_meta_last_updated_prefix\")} // {format_utc_ymd_hms(&date)}"
                                 }
                             }
 
-                            if let Some(repo) = repo_data.as_ref() {
-                                GridWrapper {
-                                    grid_type: GridType::Inner,
-                                    line_type: GridLineType::Dashed,
-                                    is_dot_on: false,
-                                    padding: GridPadding::None,
-                                    background: GridBackground {
-                                        pattern: GridPattern::Slash,
-                                        gradient: GradientDirection::None,
-                                    },
-                                    div { class: "grid grid-cols-2 gap-2 px-2 py-2 md:grid-cols-4",
-                                        div { class: "flex h-12 cursor-default items-center justify-center gap-1.5 px-1 py-1 md:h-14 md:gap-2 md:px-2",
-                                            StarIcon {
-                                                width: 24,
-                                                height: 24,
-                                                class: "text-grid-accent fill-current",
+                            GridWrapper {
+                                grid_type: GridType::Inner,
+                                line_type: GridLineType::Dashed,
+                                is_dot_on: false,
+                                padding: GridPadding::None,
+                                background: GridBackground {
+                                    pattern: GridPattern::Slash,
+                                    gradient: GradientDirection::None,
+                                },
+                                div { class: "grid grid-cols-2 gap-2 px-2 py-2 md:grid-cols-4",
+                                    div { class: "flex h-12 cursor-default items-center justify-center gap-1.5 px-1 py-1 md:h-14 md:gap-2 md:px-2",
+                                        StarIcon {
+                                            width: 24,
+                                            height: 24,
+                                            class: "text-grid-accent fill-current",
+                                        }
+                                        div { class: "flex min-w-0 flex-col leading-none",
+                                            span { class: "mb-0.5 text-base font-black text-secondary-2 md:text-xl",
+                                                "{repo_data.stars}"
                                             }
-                                            div { class: "flex min-w-0 flex-col leading-none",
-                                                span { class: "mb-0.5 text-base font-black text-secondary-2 md:text-xl",
-                                                    "{repo.stars}"
-                                                }
-                                                span { class: "font-mono text-[9px] font-bold tracking-widest text-secondary-5 uppercase",
-                                                    "Stars"
-                                                }
+                                            span { class: "font-mono text-[9px] font-bold tracking-widest text-secondary-5 uppercase",
+                                                "Stars"
                                             }
                                         }
-                                        div { class: "flex h-12 cursor-default items-center justify-center gap-1.5 px-1 py-1 md:h-14 md:gap-2 md:px-2",
-                                            GitForkIcon {
-                                                width: 24,
-                                                height: 24,
-                                                class: "text-grid-accent",
+                                    }
+                                    div { class: "flex h-12 cursor-default items-center justify-center gap-1.5 px-1 py-1 md:h-14 md:gap-2 md:px-2",
+                                        GitForkIcon {
+                                            width: 24,
+                                            height: 24,
+                                            class: "text-grid-accent",
+                                        }
+                                        div { class: "flex min-w-0 flex-col leading-none",
+                                            span { class: "mb-0.5 text-base font-black text-secondary-2 md:text-xl",
+                                                "{repo_data.forks}"
                                             }
-                                            div { class: "flex min-w-0 flex-col leading-none",
-                                                span { class: "mb-0.5 text-base font-black text-secondary-2 md:text-xl",
-                                                    "{repo.forks}"
-                                                }
-                                                span { class: "font-mono text-[9px] font-bold tracking-widest text-secondary-5 uppercase",
-                                                    "Forks"
-                                                }
+                                            span { class: "font-mono text-[9px] font-bold tracking-widest text-secondary-5 uppercase",
+                                                "Forks"
                                             }
                                         }
-                                        div { class: "flex h-12 cursor-default items-center justify-center gap-1.5 px-1 py-1 md:h-14 md:gap-2 md:px-2",
-                                            CircleDotIcon {
-                                                width: 24,
-                                                height: 24,
-                                                class: "text-grid-accent",
+                                    }
+                                    div { class: "flex h-12 cursor-default items-center justify-center gap-1.5 px-1 py-1 md:h-14 md:gap-2 md:px-2",
+                                        CircleDotIcon {
+                                            width: 24,
+                                            height: 24,
+                                            class: "text-grid-accent",
+                                        }
+                                        div { class: "flex min-w-0 flex-col leading-none",
+                                            span { class: "mb-0.5 text-base font-black text-secondary-2 md:text-xl",
+                                                "{repo_data.open_issues}"
                                             }
-                                            div { class: "flex min-w-0 flex-col leading-none",
-                                                span { class: "mb-0.5 text-base font-black text-secondary-2 md:text-xl",
-                                                    "{repo.open_issues}"
-                                                }
-                                                span { class: "font-mono text-[9px] font-bold tracking-widest text-secondary-5 uppercase",
-                                                    "Issues"
-                                                }
+                                            span { class: "font-mono text-[9px] font-bold tracking-widest text-secondary-5 uppercase",
+                                                "Issues"
                                             }
                                         }
-                                        div { class: "flex h-12 cursor-default items-center justify-center gap-1.5 px-1 py-1 md:h-14 md:gap-2 md:px-2",
-                                            UsersRoundIcon {
-                                                width: 24,
-                                                height: 24,
-                                                class: "text-grid-accent",
+                                    }
+                                    div { class: "flex h-12 cursor-default items-center justify-center gap-1.5 px-1 py-1 md:h-14 md:gap-2 md:px-2",
+                                        UsersRoundIcon {
+                                            width: 24,
+                                            height: 24,
+                                            class: "text-grid-accent",
+                                        }
+                                        div { class: "flex min-w-0 flex-col leading-none",
+                                            span { class: "mb-0.5 text-base font-black text-secondary-2 md:text-xl",
+                                                "{repo_data.watchers}"
                                             }
-                                            div { class: "flex min-w-0 flex-col leading-none",
-                                                span { class: "mb-0.5 text-base font-black text-secondary-2 md:text-xl",
-                                                    "{repo.watchers}"
-                                                }
-                                                span { class: "font-mono text-[9px] font-bold tracking-widest text-secondary-5 uppercase",
-                                                    "Watchers"
-                                                }
+                                            span { class: "font-mono text-[9px] font-bold tracking-widest text-secondary-5 uppercase",
+                                                "Watchers"
                                             }
                                         }
                                     }
@@ -263,25 +259,23 @@ pub(crate) fn MetaSection() -> Element {
                                 }
                             }
 
-                            if let Some(repo) = repo_data.as_ref() {
-                                if !repo.tags.is_empty() {
-                                    div { class: "flex flex-wrap gap-1.5 pt-1 md:gap-2",
-                                        for tag in repo.tags.iter() {
-                                            Link {
-                                                key: "{tag.label}:{tag.value}",
-                                                to: Route::RepoListView {
-                                                    tags: Some(tag.value.clone()),
-                                                    metric: None,
-                                                    range: None,
-                                                    page: None,
-                                                    size: None,
-                                                },
-                                                class: "group inline-flex items-center border border-primary-6 bg-primary-1 px-2 py-1 font-mono text-[10px] font-bold tracking-wider text-secondary-2 lowercase transition-colors hover:bg-grid-accent hover:text-primary-1 md:px-2.5 md:py-1.5 md:text-xs",
-                                                span { class: "mr-1.5 text-grid-accent transition-colors group-hover:text-primary-1",
-                                                    "#"
-                                                }
-                                                "{tag.value}"
+                            if !repo_data.tags.is_empty() {
+                                div { class: "flex flex-wrap gap-1.5 pt-1 md:gap-2",
+                                    for tag in repo_data.tags.iter() {
+                                        Link {
+                                            key: "{tag.label}:{tag.value}",
+                                            to: Route::RepoListView {
+                                                tags: Some(tag.value.clone()),
+                                                metric: None,
+                                                range: None,
+                                                page: None,
+                                                size: None,
+                                            },
+                                            class: "group inline-flex items-center border border-primary-6 bg-primary-1 px-2 py-1 font-mono text-[10px] font-bold tracking-wider text-secondary-2 lowercase transition-colors hover:bg-grid-accent hover:text-primary-1 md:px-2.5 md:py-1.5 md:text-xs",
+                                            span { class: "mr-1.5 text-grid-accent transition-colors group-hover:text-primary-1",
+                                                "#"
                                             }
+                                            "{tag.value}"
                                         }
                                     }
                                 }

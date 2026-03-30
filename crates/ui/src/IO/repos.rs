@@ -78,7 +78,20 @@ pub async fn get_repo(owner: String, name: String) -> ServerFnResult<Option<Repo
         .await
         .map_err(api_error)?;
 
-    Ok(repo.map(RepoDto::from))
+    let Some(repo) = repo else {
+        return Ok(None);
+    };
+
+    let project = app_state
+        .project
+        .query
+        .get(&repo.repo.id)
+        .await
+        .map_err(api_error)?;
+
+    let mut dto = RepoDto::from(repo);
+    dto.project_status = project.map(|project| project.status);
+    Ok(Some(dto))
 }
 
 #[post("/api/repos/:owner/:name/readme", state: State)]

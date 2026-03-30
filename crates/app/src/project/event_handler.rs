@@ -1,26 +1,22 @@
 use crate::app_error::AppResult;
-use crate::repo::{GithubGateway, RepoCommandHandler, RepoGithubLookupExt, RepoProjectOverrideExt, RepoRepo};
+use crate::repo::{RepoCommandHandler, RepoProjectOverrideExt, RepoRepo};
 use domain::{ProjectCreated, ProjectUpdated, Repo};
-use futures::{stream, StreamExt, TryStreamExt};
 use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct ProjectEventHandler {
     repo_command: RepoCommandHandler,
     repos: Arc<dyn RepoRepo>,
-    github: Arc<dyn GithubGateway>,
 }
 
 impl ProjectEventHandler {
     pub fn new(
         repo_command: RepoCommandHandler,
         repos: Arc<dyn RepoRepo>,
-        github: Arc<dyn GithubGateway>,
     ) -> Self {
         Self {
             repo_command,
             repos,
-            github,
         }
     }
 
@@ -50,7 +46,6 @@ impl ProjectEventHandler {
             return Ok(());
         }
 
-        const FETCH_CONCURRENCY: usize = 16;
         let projects = events
             .iter()
             .map(|event| event.project.clone())
@@ -75,23 +70,10 @@ impl ProjectEventHandler {
             })
             .collect::<Vec<_>>();
 
-        let github = self.github.clone();
-        let synced_repos: Vec<Repo> = stream::iter(fetch_items.into_iter())
-            .map(|(project, repo)| {
-                let github = github.clone();
-                async move {
-                    let github_repo = github.fetch_repo_by_lookup_key(&repo.github_lookup_key()).await?;
-                    let synced_repo = repo.with_project_overrides(
-                        &project,
-                        github_repo.homepage.as_deref(),
-                        github_repo.owner_avatar_url.as_deref(),
-                    );
-                    Ok::<Repo, crate::app_error::AppError>(synced_repo)
-                }
-            })
-            .buffer_unordered(FETCH_CONCURRENCY)
-            .try_collect()
-            .await?;
+        let synced_repos = fetch_items
+            .into_iter()
+            .map(|(project, repo)| repo.with_project_overrides(&project))
+            .collect::<Vec<Repo>>();
 
         if synced_repos.is_empty() {
             return Ok(());

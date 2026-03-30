@@ -2,14 +2,12 @@ use futures::{stream, StreamExt};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
-use domain::{Project, ProjectCreated, ProjectUpdated, Repo, RepoId, Tag};
+use domain::{Project, ProjectCreated, ProjectStatus, ProjectUpdated, Repo, RepoId, Tag};
 use serde::{Deserialize, Serialize};
 
 use crate::app_error::AppResult;
 use crate::project::{ProjectEventHandler, ProjectRepo};
-use crate::repo::{
-    GithubGateway, RepoGithubLookupKey, RepoRepo, RepoTagRepo,
-};
+use crate::repo::{GithubGateway, RepoGithubLookupKey, RepoRepo, RepoTagRepo};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ImportProjectCommand {
@@ -21,7 +19,7 @@ pub struct ImportProjectCommand {
     pub url: Option<String>,
     pub avatar_url: Option<String>,
 
-    pub status: Option<String>,
+    pub status: ProjectStatus,
     pub twitter: Option<String>,
     #[serde(default)]
     pub tags: Option<Vec<String>>,
@@ -134,11 +132,10 @@ impl ProjectCommandHandler {
                 .map(|project| {
                     let github = github.clone();
                     async move {
-                        let github_repo =
-                            github
-                            .fetch_repo_by_lookup_key(
-                                &RepoGithubLookupKey::from_repo_id(project.id.as_str()),
-                            )
+                        let github_repo = github
+                            .fetch_repo_by_lookup_key(&RepoGithubLookupKey::from_repo_id(
+                                project.id.as_str(),
+                            ))
                             .await
                             .map_err(|err| {
                                 format!(
@@ -146,21 +143,24 @@ impl ProjectCommandHandler {
                                     project.id.as_str()
                                 )
                             })?;
-                        Ok::<(Project, Repo), String>((project.clone(), Repo {
-                            id: project.id,
-                            github_repo_id: Some(github_repo.id),
-                            full_name: Some(github_repo.full_name),
-                            description: github_repo.description,
-                            homepage_url: github_repo.homepage,
-                            avatar_url: github_repo.owner_avatar_url,
-                            stars: github_repo.stargazers_count,
-                            forks: github_repo.forks_count,
-                            open_issues: github_repo.open_issues_count,
-                            watchers: github_repo.subscribers_count,
-                            created_at: chrono::Utc::now().to_rfc3339(),
-                            last_fetched_at: None,
-                            etag: None,
-                        }))
+                        Ok::<(Project, Repo), String>((
+                            project.clone(),
+                            Repo {
+                                id: project.id,
+                                github_repo_id: Some(github_repo.id),
+                                full_name: Some(github_repo.full_name),
+                                description: github_repo.description,
+                                homepage_url: github_repo.homepage,
+                                avatar_url: github_repo.owner_avatar_url,
+                                stars: github_repo.stargazers_count,
+                                forks: github_repo.forks_count,
+                                open_issues: github_repo.open_issues_count,
+                                watchers: github_repo.subscribers_count,
+                                created_at: chrono::Utc::now().to_rfc3339(),
+                                last_fetched_at: None,
+                                etag: None,
+                            },
+                        ))
                     }
                 })
                 .buffer_unordered(FETCH_CONCURRENCY)
@@ -198,7 +198,10 @@ impl ProjectCommandHandler {
                 }
             }
             let all_requested_values = Self::normalize_tag_values(all_requested_values);
-            let matched_tags = self.repo_tags.find_tags_by_values(&all_requested_values).await?;
+            let matched_tags = self
+                .repo_tags
+                .find_tags_by_values(&all_requested_values)
+                .await?;
             let mut matched_tag_by_value = HashMap::new();
             for matched_tag in matched_tags {
                 matched_tag_by_value.insert(matched_tag.value.as_str().to_string(), matched_tag);
@@ -227,7 +230,9 @@ impl ProjectCommandHandler {
                 replace_items.push((project.id.clone(), resolved_tags));
             }
             if !replace_items.is_empty() {
-                self.repo_tags.replace_repo_tags_bulk(&replace_items).await?;
+                self.repo_tags
+                    .replace_repo_tags_bulk(&replace_items)
+                    .await?;
             }
             report.upserted = upsert_projects.len();
         }

@@ -7,6 +7,7 @@ use crate::impls::state::State;
 
 use app::prelude::{Page, Pagination};
 use app::project::{ImportProjectCommand, ImportProjectsCommand, RemoveProjectCommand};
+use domain::ProjectStatus;
 use serde::Deserialize;
 
 #[post("/api/projects", state: State)]
@@ -29,6 +30,35 @@ pub async fn search_projects(key: String, page: Pagination) -> ServerFnResult<Pa
         .project
         .query
         .search_by_key(key, page)
+        .await
+        .map_err(api_error)?;
+
+    Ok(projects_page.map(ProjectDto::from))
+}
+
+#[post("/api/projects/disabled", state: State)]
+pub async fn list_disabled_projects(page: Pagination) -> ServerFnResult<Page<ProjectDto>> {
+    let app_state = state.0;
+    let projects_page = app_state
+        .project
+        .query
+        .list_disabled(page)
+        .await
+        .map_err(api_error)?;
+
+    Ok(projects_page.map(ProjectDto::from))
+}
+
+#[post("/api/projects/search_disabled", state: State)]
+pub async fn search_disabled_projects(
+    key: String,
+    page: Pagination,
+) -> ServerFnResult<Page<ProjectDto>> {
+    let app_state = state.0;
+    let projects_page = app_state
+        .project
+        .query
+        .search_disabled_by_key(key, page)
         .await
         .map_err(api_error)?;
 
@@ -141,7 +171,7 @@ pub async fn import_projects_json(json_text: String) -> ServerFnResult<ImportPro
                 description: String::new(),
                 url: None,
                 avatar_url: None,
-                status: None,
+                status: ProjectStatus::Unknown,
                 twitter: None,
                 tags: it.tags,
             })

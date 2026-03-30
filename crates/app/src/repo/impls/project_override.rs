@@ -1,24 +1,18 @@
 use domain::{Project, Repo};
 
 pub trait RepoProjectOverrideExt {
-    fn with_project_overrides(
-        self,
-        project: &Project,
-        github_homepage: Option<&str>,
-        owner_avatar_url: Option<&str>,
-    ) -> Self;
+    fn with_project_overrides(self, project: &Project) -> Self;
 }
 
 impl RepoProjectOverrideExt for Repo {
-    fn with_project_overrides(
-        mut self,
-        project: &Project,
-        github_homepage: Option<&str>,
-        owner_avatar_url: Option<&str>,
-    ) -> Self {
-        self.homepage_url = clean_url(github_homepage).or_else(|| clean_url(project.url.as_deref()));
+    fn with_project_overrides(mut self, project: &Project) -> Self {
+        let existing_homepage = self.homepage_url.clone();
+        let existing_avatar = self.avatar_url.clone();
+
+        self.homepage_url =
+            clean_url(existing_homepage.as_deref()).or_else(|| clean_url(project.url.as_deref()));
         self.avatar_url = clean_url(project.avatar_url.as_deref())
-            .or_else(|| clean_url(owner_avatar_url))
+            .or_else(|| clean_url(existing_avatar.as_deref()))
             .or_else(|| owner_avatar_fallback(self.id.as_str()));
         self
     }

@@ -1,8 +1,8 @@
 use super::db_err;
 use app::app_error::AppResult;
 use app::common::pagination::{Page, Pagination};
-use app::project::ProjectRepo;
-use domain::{Project, RepoId};
+use app::project::{ProjectRepo, parse_project_status, project_status_value};
+use domain::{Project, ProjectStatus, RepoId};
 use sqlx::{QueryBuilder, Sqlite};
 
 #[derive(Debug, sqlx::FromRow)]
@@ -26,7 +26,7 @@ impl From<ProjectDb> for Project {
             description: db.description,
             url: db.url,
             avatar_url: db.avatar_url,
-            status: db.status,
+            status: parse_project_status(db.status.as_deref()),
             twitter: db.twitter,
         }
     }
@@ -45,6 +45,26 @@ impl SqliteProjectRepo {
 
 #[async_trait::async_trait]
 impl ProjectRepo for SqliteProjectRepo {
+    async fn get(&self, repo_id: &RepoId) -> AppResult<Option<Project>> {
+        let row: Option<ProjectDb> = sqlx::query_as(
+            r#"
+            SELECT
+              repo_id,
+              name, slug, description,
+              url, avatar_url,
+              status, twitter
+            FROM projects
+            WHERE repo_id = ?
+            "#,
+        )
+        .bind(repo_id.as_str())
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(db_err)?;
+
+        Ok(row.map(Into::into))
+    }
+
     async fn upsert(&self, project: &Project) -> AppResult<()> {
         self.upsert_many(std::slice::from_ref(project)).await
     }
@@ -74,7 +94,7 @@ impl ProjectRepo for SqliteProjectRepo {
                 .push_bind(&p.description)
                 .push_bind(&p.url)
                 .push_bind(&p.avatar_url)
-                .push_bind(&p.status)
+                .push_bind(project_status_value(p.status))
                 .push_bind(&p.twitter)
                 .push("datetime('now')");
         });
@@ -104,7 +124,7 @@ impl ProjectRepo for SqliteProjectRepo {
                 .push_bind(&p.description)
                 .push_bind(&p.url)
                 .push_bind(&p.avatar_url)
-                .push_bind(&p.status)
+                .push_bind(project_status_value(p.status))
                 .push_bind(&p.twitter);
         });
 
@@ -162,7 +182,7 @@ impl ProjectRepo for SqliteProjectRepo {
                 .push_bind(&p.description)
                 .push_bind(&p.url)
                 .push_bind(&p.avatar_url)
-                .push_bind(&p.status)
+                .push_bind(project_status_value(p.status))
                 .push_bind(&p.twitter);
         });
         update_builder.push(
@@ -265,6 +285,99 @@ impl ProjectRepo for SqliteProjectRepo {
             LIMIT ? OFFSET ?
             "#,
         )
+        .bind(&pattern)
+        .bind(&pattern)
+        .bind(&pattern)
+        .bind(&pattern)
+        .bind(limit as i64)
+        .bind(offset as i64)
+        .fetch_all(&self.pool)
+        .await
+        .map_err(db_err)?;
+
+        let items = rows.into_iter().map(Into::into).collect();
+        Ok(page.to_page(items, total as u64))
+    }
+
+    async fn list_disabled(&self, page: Pagination) -> AppResult<Page<Project>> {
+        let limit = page.limit();
+        let offset = page.offset();
+        let disabled_status = project_status_value(ProjectStatus::Disabled);
+        let total: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM projects WHERE status = ?")
+            .bind(disabled_status)
+            .fetch_one(&self.pool)
+            .await
+            .map_err(db_err)?;
+
+        let rows: Vec<ProjectDb> = sqlx::query_as(
+            r#"
+            SELECT
+              repo_id,
+              name, slug, description,
+              url, avatar_url,
+              status, twitter
+            FROM projects
+            WHERE status = ?
+            ORDER BY name ASC
+            LIMIT ? OFFSET ?
+            "#,
+        )
+        .bind(disabled_status)
+        .bind(limit as i64)
+        .bind(offset as i64)
+        .fetch_all(&self.pool)
+        .await
+        .map_err(db_err)?;
+        let items = rows.into_iter().map(Into::into).collect();
+        Ok(page.to_page(items, total as u64))
+    }
+
+    async fn search_disabled_by_key(
+        &self,
+        key: String,
+        page: Pagination,
+    ) -> AppResult<Page<Project>> {
+        let limit = page.limit();
+        let offset = page.offset();
+        let key = key.trim();
+        if key.is_empty() {
+            return Ok(page.to_page(Vec::new(), 0));
+        }
+        let pattern = format!("%{key}%");
+        let disabled_status = project_status_value(ProjectStatus::Disabled);
+
+        let total: i64 = sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)
+            FROM projects
+            WHERE status = ?
+              AND (repo_id LIKE ? OR name LIKE ? OR slug LIKE ? OR description LIKE ?)
+            "#,
+        )
+        .bind(disabled_status)
+        .bind(&pattern)
+        .bind(&pattern)
+        .bind(&pattern)
+        .bind(&pattern)
+        .fetch_one(&self.pool)
+        .await
+        .map_err(db_err)?;
+
+        let rows: Vec<ProjectDb> = sqlx::query_as(
+            r#"
+            SELECT
+              repo_id,
+              name, slug, description,
+              url, avatar_url,
+              status, twitter
+            FROM projects
+            WHERE status = ?
+              AND (repo_id LIKE ? OR name LIKE ? OR slug LIKE ? OR description LIKE ?)
+            ORDER BY name ASC
+            LIMIT ? OFFSET ?
+            "#,
+        )
+        .bind(disabled_status)
         .bind(&pattern)
         .bind(&pattern)
         .bind(&pattern)

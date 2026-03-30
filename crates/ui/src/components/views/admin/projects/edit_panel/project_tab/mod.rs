@@ -1,11 +1,16 @@
 pub(crate) mod skeleton;
 
 use dioxus::prelude::*;
+use domain::ProjectStatus;
 
 use crate::components::icons::{PlusIcon, SaveIcon};
 
 use crate::components::ui::button::Button;
 use crate::components::ui::input::Input;
+use crate::components::ui::select::{
+    Select, SelectGroup, SelectGroupLabel, SelectItemIndicator, SelectList, SelectOption,
+    SelectTrigger, SelectValue,
+};
 use crate::components::ui::textarea::Textarea;
 use crate::IO::projects::{import_projects, import_projects_json, update_projects};
 use crate::IO::repos::list_tags_with_meta;
@@ -14,7 +19,7 @@ use crate::types::tags::TagDto;
 
 use super::super::context::{ProjectPanelMode, ProjectsContext};
 
-#[derive(Clone, PartialEq, Default)]
+#[derive(Clone, PartialEq)]
 struct ProjectFormData {
     repo_id: String,
     name: String,
@@ -22,9 +27,25 @@ struct ProjectFormData {
     description: String,
     url: Option<String>,
     avatar_url: Option<String>,
-    status: Option<String>,
+    status: ProjectStatus,
     twitter: Option<String>,
     selected_tag_values: Vec<String>,
+}
+
+impl Default for ProjectFormData {
+    fn default() -> Self {
+        Self {
+            repo_id: String::new(),
+            name: String::new(),
+            slug: String::new(),
+            description: String::new(),
+            url: None,
+            avatar_url: None,
+            status: ProjectStatus::Unknown,
+            twitter: None,
+            selected_tag_values: Vec::new(),
+        }
+    }
 }
 
 impl From<&ProjectDto> for ProjectFormData {
@@ -36,7 +57,7 @@ impl From<&ProjectDto> for ProjectFormData {
             description: project.description.clone(),
             url: project.url.clone(),
             avatar_url: project.avatar_url.clone(),
-            status: project.status.clone(),
+            status: project.status,
             twitter: project.twitter.clone(),
             selected_tag_values: Vec::new(),
         }
@@ -67,7 +88,7 @@ impl ProjectFormData {
             description: self.description.clone(),
             url: self.url.clone(),
             avatar_url: self.avatar_url.clone(),
-            status: self.status.clone(),
+            status: self.status,
             twitter: self.twitter.clone(),
             tags: if is_add_mode && !self.selected_tag_values.is_empty() {
                 Some(self.selected_tag_values.clone())
@@ -211,16 +232,46 @@ pub(super) fn ProjectTab(props: ProjectTabProps) -> Element {
                     }
                 }),
             }
-            Input {
+            Select::<ProjectStatus> {
+                class: "select w-full",
+                value: Some(data_state.status),
                 placeholder: "status",
-                value: data_state.status.clone().unwrap_or_default(),
-                oninput: move |e: FormEvent| data.with_mut(|d| {
-                    d.status = if e.value().trim().is_empty() {
-                        None
-                    } else {
-                        Some(e.value())
+                on_value_change: move |next: Option<ProjectStatus>| {
+                    if let Some(next) = next {
+                        data.with_mut(|d| d.status = next);
                     }
-                }),
+                },
+                SelectTrigger {
+                    class: "select-trigger w-full px-3 py-2 text-sm",
+                    aria_label: "project status",
+                    SelectValue {}
+                }
+                SelectList { aria_label: "project status options",
+                    SelectGroup {
+                        SelectGroupLabel { "status" }
+                        SelectOption::<ProjectStatus> {
+                            index: 0usize,
+                            value: ProjectStatus::Active,
+                            text_value: Some("Active".to_string()),
+                            "Active"
+                            SelectItemIndicator {}
+                        }
+                        SelectOption::<ProjectStatus> {
+                            index: 1usize,
+                            value: ProjectStatus::Disabled,
+                            text_value: Some("Disabled".to_string()),
+                            "Disabled"
+                            SelectItemIndicator {}
+                        }
+                        SelectOption::<ProjectStatus> {
+                            index: 2usize,
+                            value: ProjectStatus::Unknown,
+                            text_value: Some("Unknown".to_string()),
+                            "Unknown"
+                            SelectItemIndicator {}
+                        }
+                    }
+                }
             }
             Input {
                 placeholder: "twitter",

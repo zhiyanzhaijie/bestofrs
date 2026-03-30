@@ -2,7 +2,7 @@ use super::tags::TagDto;
 use app::prelude::*;
 use app::repo::BulkUpdateRepoTagResult;
 use app::repo::GithubReadme;
-use domain::{Repo, RepoWithTags};
+use domain::{ProjectStatus, Repo, RepoWithTags};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -20,6 +20,7 @@ pub struct RepoDto {
     pub watchers: i64,
     pub created_at: String,
     pub last_fetched_at: Option<String>,
+    pub project_status: Option<ProjectStatus>,
     pub tags: Vec<TagDto>,
 }
 
@@ -57,6 +58,7 @@ impl From<Repo> for RepoDto {
             watchers: value.watchers,
             created_at: value.created_at,
             last_fetched_at: value.last_fetched_at,
+            project_status: None,
             tags: Vec::new(),
         }
     }
@@ -81,6 +83,7 @@ impl From<RepoWithTags> for RepoDto {
             watchers: repo.watchers,
             created_at: repo.created_at,
             last_fetched_at: repo.last_fetched_at,
+            project_status: None,
             tags,
         }
     }
