@@ -36,26 +36,24 @@ pub fn GearMap(
     let gears = use_memo(move || generate_gears(count, resolved_seed));
 
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("./style.css") }
-
         div {
             class: "pointer-events-none absolute inset-x-0 bottom-0 overflow-hidden {class}",
             style: "height: {height}px;",
             for (idx, gear) in gears().iter().enumerate() {
                 div {
                     key: "{idx}",
-                    class: "gear-item",
+                    class: "absolute aspect-square opacity-30 [left:var(--gear-left-pct,50%)] [top:var(--gear-top-pct,50%)] [width:var(--gear-size-pct,10%)] [transform:translate(-50%,-50%)_rotate(var(--gear-rotation-deg,0deg))]",
                     style: "--gear-left-pct: {gear.left_pct:.2}%; --gear-top-pct: {gear.top_pct:.2}%; --gear-size-pct: {gear.size_pct:.3}%; --gear-rotation-deg: {gear.rotation_deg:.1}deg;",
                     div {
-                        class: "animate-spin gear-spin gear-spin-delayed",
+                        class: "size-full origin-center animate-spin [animation-timing-function:linear] [animation-iteration-count:infinite] [animation-duration:var(--gear-spin-seconds,60s)]",
                         class: if gear.clockwise {
-                            "gear-spin-cw"
+                            "[animation-direction:normal]"
                         } else {
-                            "gear-spin-ccw"
+                            "[animation-direction:reverse]"
                         },
                         style: "--gear-spin-seconds: {gear.spin_seconds:.1}s;",
                         div {
-                            class: "gear-visual",
+                            class: "block size-full",
                             RustGearIcon {
                                 width: gear.size,
                                 style: "width: 100%; height: 100%; display: block;",
