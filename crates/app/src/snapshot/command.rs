@@ -1,13 +1,13 @@
 use std::collections::HashSet;
 use std::sync::Arc;
 
-use futures::{stream, StreamExt, TryStreamExt};
+use futures::{stream, StreamExt};
 
 use domain::{Repo, Snapshot, SnapshotRecorded};
 
 use crate::app_error::AppResult;
 use crate::common::pagination::Pagination;
-use crate::project::ProjectQueryHandler;
+use crate::project::{ProjectQueryHandler, ProjectStatusExt};
 use crate::repo::{
     GithubGateway, RepoCommandHandler, RepoGithubLookupExt,
     RepoGithubLookupKey, RepoRepo,
@@ -59,6 +59,14 @@ pub struct IngestDailySnapshotsResult {
     pub projects: usize,
     pub repos_upserted: usize,
     pub snapshots_inserted: usize,
+    pub failures: Vec<IngestDailySnapshotFailure>,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct IngestDailySnapshotFailure {
+    pub repo_id: String,
+    pub lookup_key: String,
+    pub error: String,
 }
 
 /// Command use case: ingest snapshots for all projects for today's date.
@@ -118,9 +126,14 @@ impl IngestDailySnapshots {
             }
         }
 
+        let projects_total = projects.len();
+        let projects = projects
+            .into_iter()
+            .filter(|project| !project.is_disabled())
+            .collect::<Vec<_>>();
+
         let today = self.clock.utc_today_ymd();
         let fetched_at = self.clock.utc_now_rfc3339();
-        let projects_total = projects.len();
 
         let project_ids = projects.iter().map(|p| p.id.clone()).collect::<Vec<_>>();
         let existing_repos = self.repos.list_by_ids(&project_ids).await?;
@@ -137,60 +150,77 @@ impl IngestDailySnapshots {
             .collect::<Vec<_>>();
 
         let github = self.github.clone();
-        let fetched: Vec<(Repo, Snapshot)> = stream::iter(fetch_items.into_iter())
+        let fetched = stream::iter(fetch_items.into_iter())
             .map(|(project, lookup_key)| {
                 let github = github.clone();
                 let fetched_at = fetched_at.clone();
                 async move {
-                    let repo = github.fetch_repo_by_lookup_key(&lookup_key).await?;
-                    let homepage_url = Self::resolve_homepage_url(
-                        repo.homepage.as_deref(),
-                        project.url.as_deref(),
-                    );
-                    let avatar_url = Self::resolve_avatar_url(
-                        project.id.as_str(),
-                        project.avatar_url.as_deref(),
-                        repo.owner_avatar_url.as_deref(),
-                    );
+                    let lookup_key_display = format!("{lookup_key:?}");
+                    let repo_id = project.id.as_str().to_string();
 
-                    let domain_repo = Repo {
-                        id: project.id,
-                        github_repo_id: Some(repo.id),
-                        full_name: Some(repo.full_name),
-                        description: repo.description,
-                        homepage_url,
-                        avatar_url,
-                        stars: repo.stargazers_count,
-                        forks: repo.forks_count,
-                        open_issues: repo.open_issues_count,
-                        watchers: repo.subscribers_count,
-                        created_at: fetched_at.clone(),
-                        last_fetched_at: Some(fetched_at.clone()),
-                        etag: None,
-                    };
+                    match github.fetch_repo_by_lookup_key(&lookup_key).await {
+                        Ok(repo) => {
+                            let homepage_url = Self::resolve_homepage_url(
+                                repo.homepage.as_deref(),
+                                project.url.as_deref(),
+                            );
+                            let avatar_url = Self::resolve_avatar_url(
+                                project.id.as_str(),
+                                project.avatar_url.as_deref(),
+                                repo.owner_avatar_url.as_deref(),
+                            );
 
-                    let snapshot = Snapshot {
-                        repo_id: domain_repo.id.clone(),
-                        snapshot_date: today,
-                        stars: domain_repo.stars,
-                        forks: domain_repo.forks,
-                        open_issues: domain_repo.open_issues,
-                        watchers: domain_repo.watchers,
-                        fetched_at: fetched_at.clone(),
-                    };
+                            let domain_repo = Repo {
+                                id: project.id,
+                                github_repo_id: Some(repo.id),
+                                full_name: Some(repo.full_name),
+                                description: repo.description,
+                                homepage_url,
+                                avatar_url,
+                                stars: repo.stargazers_count,
+                                forks: repo.forks_count,
+                                open_issues: repo.open_issues_count,
+                                watchers: repo.subscribers_count,
+                                created_at: fetched_at.clone(),
+                                last_fetched_at: Some(fetched_at.clone()),
+                                etag: None,
+                            };
 
-                    Ok::<(Repo, Snapshot), crate::app_error::AppError>((domain_repo, snapshot))
+                            let snapshot = Snapshot {
+                                repo_id: domain_repo.id.clone(),
+                                snapshot_date: today,
+                                stars: domain_repo.stars,
+                                forks: domain_repo.forks,
+                                open_issues: domain_repo.open_issues,
+                                watchers: domain_repo.watchers,
+                                fetched_at: fetched_at.clone(),
+                            };
+
+                            Ok((domain_repo, snapshot))
+                        }
+                        Err(err) => Err(IngestDailySnapshotFailure {
+                            repo_id,
+                            lookup_key: lookup_key_display,
+                            error: err.to_string(),
+                        }),
+                    }
                 }
             })
             .buffer_unordered(FETCH_CONCURRENCY)
-            .try_collect()
-            .await?;
+            .collect::<Vec<_>>()
+            .await;
 
-        let mut repos = Vec::with_capacity(fetched.len());
-        let mut snapshots = Vec::with_capacity(fetched.len());
-        for (repo, snapshot) in fetched {
-            repos.push(repo);
-            snapshots.push(snapshot);
+        let mut failures = Vec::new();
+        let mut repos = Vec::new();
+        let mut snapshots = Vec::new();
+        for item in fetched {
+            match item {
+                Ok((repo, snapshot)) => {
+                    repos.push(repo);
+                    snapshots.push(snapshot);
+                }
+                Err(failure) => failures.push(failure),
+            }
         }
 
         self.repo_command.upsert_many(&repos).await?;
@@ -213,6 +243,7 @@ impl IngestDailySnapshots {
             projects: projects_total,
             repos_upserted,
             snapshots_inserted,
+            failures,
         })
     }
 
