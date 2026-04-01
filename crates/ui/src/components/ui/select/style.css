@@ -22,6 +22,7 @@
   font-weight: 900;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  white-space: nowrap;
   transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .select-trigger span[data-placeholder="true"] {
@@ -127,6 +128,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  white-space: nowrap;
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 .select-option[data-disabled="true"] {
