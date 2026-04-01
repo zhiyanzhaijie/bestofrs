@@ -45,7 +45,6 @@ pub(super) fn RepoListHandler() -> Element {
                     SelectTrigger {
                         class: "select-trigger w-full min-w-0 px-2 py-2 text-[10px] tracking-[0.08em] md:min-w-[9rem] md:px-4 md:py-3 md:text-xs md:tracking-[0.14em]",
                         aria_label: t!("view_repo_list_handler_filter_aria_label"),
-                        style: "min-width: 0;",
                         SelectValue {}
                     }
                     SelectList { aria_label: t!("view_repo_list_handler_filter_options_aria_label"),
@@ -95,7 +94,6 @@ pub(super) fn RepoListHandler() -> Element {
                     SelectTrigger {
                         class: "select-trigger w-full min-w-0 px-2 py-2 text-[10px] tracking-[0.08em] md:min-w-[7rem] md:px-4 md:py-3 md:text-xs md:tracking-[0.14em]",
                         aria_label: t!("view_repo_list_handler_page_size_aria_label"),
-                        style: "min-width: 0;",
                         SelectValue {}
                     }
                     SelectList { aria_label: t!("view_repo_list_handler_page_size_options_aria_label"),
@@ -152,7 +150,6 @@ pub(super) fn RepoListHandler() -> Element {
                     SelectTrigger {
                         class: "select-trigger w-full min-w-0 px-2 py-2 text-[10px] tracking-[0.08em] md:min-w-[10rem] md:px-4 md:py-3 md:text-xs md:tracking-[0.14em]",
                         aria_label: t!("view_repo_list_handler_sort_aria_label"),
-                        style: "min-width: 0;",
                         SelectValue {}
                     }
                     SelectList { aria_label: t!("view_repo_list_handler_sort_options_aria_label"),
