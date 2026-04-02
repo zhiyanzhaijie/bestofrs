@@ -12,8 +12,6 @@ dependencies = [
  "chrono",
  "domain",
  "oauth2",
- "redis",
- "redis_pool",
  "reqwest",
  "serde",
  "serde_json",
