@@ -1,6 +1,6 @@
 # Best Of RS 架构文档
 
-> 一个基于 Rust 的 `Clean + Hexagonal + DDD + CQRS` 多 crate 实践。
+> 一个基于 Rust 的 `Clean & Hexagonal Doamin Driven Design`架构, 结合dioxus全栈。
 
 ## Clean 架构
 
@@ -18,9 +18,7 @@ crates/
 
 本项目架构参考 [axum-clean-architecture by @Thodin](https://github.com/Thodin/axum-clean-architecture/)，并结合了 Dioxus fullstack 的工程实践。
 
-![BestOfRS Clean DDD](../imgs/bestofrs_clean_ddd.png)
-
-图由 Excalidraw 绘制。
+![BestOfRS Clean DDD](../imgs/zh-CN/bestofrs_clean_ddd.zh-CN.png)
 
 核心依赖方向：
 
@@ -207,16 +205,16 @@ crates/ui/src
 
 Notice：`IO` 目录虽物理上位于 `ui`，但本质逻辑为HTTP endpoint adapter的axum实现,在架构归属上属于 `Adapter`。
 参考下图：
-![Clean & Dioxus](../imgs/bestofrs_ddd_dixous.png)
+![Clean & Dioxus](../imgs/zh-CN/bestofrs_dioxus_ddd.zh-CN.png)
 
 #### SSR Fullstack的核心
 
 Dioxus v0.7.0+ 版本提供了非常便捷的`#[post], #[get]`等宏，这些宏在提供无缝的fullstack体验的前提下，又保证了代码整洁。
-具体的Fullstack原理请参考[Dioxus官方文档](TODO)。
+具体的Fullstack原理请参考[Dioxus官方文档](https://dioxuslabs.com/learn/0.7/essentials/fullstack/)。
 
 为了更优雅的SSR实现，我根据以往的前端工程经验，创建了
 
-面向复杂ui组件的mod-like样板：
+面向复杂ui组件的`mod-like`样板：
 ```bash
 crates/ui/src/components/**/exampleComp/
 ├── mod.rs                     #组件
@@ -229,7 +227,7 @@ crates/ui/src/components/**/exampleComp/
 ```
 并封装`IOCell`组件收敛ssr处理逻辑。
 
-还有最简单的纯组件样板，`compName.rs`, 这个没有特别点，不展开
+还有最简单的纯组件样板，`compName.rs`, 这个没有特别点，不做展开。
 
 ---
 
@@ -244,3 +242,8 @@ crates/worker/src
 
 #### 内容
 依赖core层功能的快捷应用，当前仅使用到snapshot领域下一个小的快照功能。略。
+
+## 尾注
+
+本文档所用图标均由[Excalidraw](https://excalidraw.com)绘制, 鸣谢。
+

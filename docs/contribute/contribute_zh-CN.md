@@ -10,11 +10,11 @@
 > 本指南重点介绍如何为 `Best Of RS` 贡献代码。
 
 ## 前置知识
-开始贡献前，请先阅读 [Architecture](../architecture/architecture_zh-CN.md)。
+开始贡献前，请先阅读 [Architecture架构文档](../architecture/architecture_zh-CN.md)。
 
 ## 本地运行 Best Of RS
 
-克隆项目后，请先确保依赖为最新状态。
+拉取main分支源码后，请先确保依赖为最新状态。
 你需要安装与 `crates/ui/Cargo.toml` 中 Dioxus 版本兼容的 `dioxus-cli`。
 
 开始开发前，请确认以下前置条件：

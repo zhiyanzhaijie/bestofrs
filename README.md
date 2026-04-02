@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./crates/ui/assets/favicon.ico" alt="Best of RS" width="96" height="96" />
+  <img src="./docs/imgs/bestofrs_logo.svg" alt="Best of RS" width="96" />
 </p>
 
 <h1 align="center">Best Of RS</h1>
@@ -25,6 +25,44 @@
   <a href="./docs/readme/readme_zh-CN.md">中文</a>
 </p>
 
+<p align="center">
+  <b>Preview</b>
+</p>
+
+<table>
+  <tr>
+    <td colspan="3" align="center">
+      <img src="./docs/imgs/bofrs_red.png" alt="Best Of RS preview - red" width="100%" />
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" align="center">
+      <img src="./docs/imgs/bofrs_orange.png" alt="Best Of RS preview - orange" width="100%" />
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" align="center">
+      <img src="./docs/imgs/bofrs_blue.png" alt="Best Of RS preview - blue" width="100%" />
+    </td>
+  </tr>
+  <tr>
+    <td width="33.33%" align="center">
+      <img src="./docs/imgs/bofrs_yellow_sm.png" alt="Best Of RS small preview - yellow" width="100%" />
+    </td>
+    <td width="33.33%" align="center">
+      <img src="./docs/imgs/bofrs_cyan_sm.png" alt="Best Of RS small preview - cyan" width="100%" />
+    </td>
+    <td width="33.33%" align="center">
+      <img src="./docs/imgs/bofrs_green_sm.png" alt="Best Of RS small preview - green" width="100%" />
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" align="center">
+      <img src="./docs/imgs/bofrs_purple.png" alt="Best Of RS preview - purple" width="100%" />
+    </td>
+  </tr>
+</table>
+
 ## About
 
 Best Of RS started from a simple goal: make Rust open source exploration less cold and more alive.
@@ -41,6 +79,10 @@ The tool focuses on project `metadata` and `community health`, then visualizes t
 ## Architecture
 
 Best Of RS is built around a curated project list, a daily tracking pipeline, and a trend-focused UI layer.
+
+And the architecture blueprint looks like:
+![Best Of RS](./docs/imgs/bestofrs_architecture.png)
+
 
 See details: [Architecture](./docs/architecture/architecture.md)
 
@@ -70,7 +112,7 @@ However, the following are **not** licensed under **`MIT`** and are **reserved**
 
 You may not use the reserved items to imply endorsement, affiliation, or to create a confusingly similar service without prior written permission from the project owner.
 
-If you would like to use any of the reserved items, please contact: [Zhiyanzhaijie](https://github.com/zhiyanzhaijie)
+If you would like to use any of the reserved items, please contact: [zhiyanzhaijie](https://github.com/zhiyanzhaijie)
 
 ### Notice
 

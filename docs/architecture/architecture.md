@@ -1,6 +1,6 @@
 # Best Of RS's Architecture
 
-> A multi-crate Rust practice of `Clean + Hexagonal + DDD + CQRS`.
+> A multi-crate Rust practice of `Clean & Hexagonal Domain Driven Design`, combined Dioxus's fullstack.
 
 ## Clean Architecture
 
@@ -20,7 +20,6 @@ This architecture is inspired by [axum-clean-architecture by @Thodin](https://gi
 
 ![BestOfRS Clean DDD](../imgs/bestofrs_clean_ddd.png)
 
-Diagram drawn in Excalidraw.
 
 Core dependency direction:
 
@@ -213,9 +212,9 @@ See also:
 
 #### SSR Fullstack Essentials
 
-Dioxus v0.7.0+ provides convenient macros such as `#[post]` and `#[get]`. They provide a seamless fullstack development experience while keeping code organization clean. For details, see [Dioxus official docs](TODO).
+Dioxus v0.7.0+ provides convenient macros such as `#[post]` and `#[get]`. They provide a seamless fullstack development experience while keeping code organization clean. For details, see [Dioxus official docs](https://dioxuslabs.com/learn/0.7/essentials/fullstack/).
 
-For cleaner SSR handling in complex components, this project uses a mod-like component blueprint:
+For cleaner SSR handling in complex components, this project uses a `mod-like` component blueprint:
 
 ```bash
 crates/ui/src/components/**/exampleComp/
@@ -230,7 +229,7 @@ crates/ui/src/components/**/exampleComp/
 
 The `IOCell` component is used to centralize SSR handling logic.
 
-A minimal pure-component template (`compName.rs`) is also supported when no extra structure is needed.
+A minimal pure-component template (`compName.rs`) is also supported but it desn't need a word.
 
 ---
 
@@ -246,3 +245,7 @@ crates/worker/src
 #### Contents
 
 A lightweight application entry that reuses core capabilities. Currently it is used for a snapshot-related background task.
+
+## Note
+All diagrams are drawn in [Excalidraw](https://excalidraw.com).
+
