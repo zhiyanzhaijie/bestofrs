@@ -9,8 +9,8 @@ use crate::components::{
         Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetSide, SheetTitle,
     },
     skeleton::Skeleton,
-    ColorSwitcher, Footer, FuzzySearch, GithubLink, HeaderNav, LanguageSwitcher, ThemeSwitcher,
-    UserProfile,
+    ColorSwitcher, DiscordLink, Footer, FuzzySearch, GithubLink, HeaderNav, LanguageSwitcher,
+    ThemeSwitcher, UserProfile,
 };
 use crate::root::Route;
 
@@ -73,6 +73,7 @@ pub fn UserLayout() -> Element {
                                             ThemeSwitcher {}
                                             LanguageSwitcher {}
                                             ColorSwitcher {}
+                                            DiscordLink {}
                                             GithubLink {  }
                                         }
                                     }
@@ -92,6 +93,7 @@ pub fn UserLayout() -> Element {
                             ThemeSwitcher {}
                             LanguageSwitcher {}
                             ColorSwitcher {}
+                            DiscordLink {}
                             GithubLink {}
                             UserProfile {}
                         }

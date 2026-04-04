@@ -1,4 +1,5 @@
 mod color_switcher;
+mod discord_link;
 mod footer;
 mod fuzzy_search;
 mod gearmap;
@@ -9,6 +10,7 @@ mod theme_switcher;
 mod user_profile;
 
 pub use color_switcher::ColorSwitcher;
+pub use discord_link::DiscordLink;
 pub use footer::Footer;
 pub use fuzzy_search::FuzzySearch;
 pub use github_link::GithubLink;
