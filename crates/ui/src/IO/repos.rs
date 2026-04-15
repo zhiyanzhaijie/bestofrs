@@ -52,7 +52,7 @@ pub async fn list_repos_with_query(query: RepoListQuery) -> ServerFnResult<Page<
             .list_ranked_with_tags(
                 RepoRankQuery {
                     metric: RepoRankMetric::Recent,
-                    range: RepoRankTimeRange::Monthly,
+                    range: RepoRankTimeRange::All,
                 },
                 query.page,
             )

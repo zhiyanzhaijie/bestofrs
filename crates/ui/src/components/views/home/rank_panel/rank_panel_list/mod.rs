@@ -24,7 +24,11 @@ pub(super) fn HomeRankPanelList(props: HomeRankPanelListProps) -> Element {
                 offset: Some(0),
             },
             metric: Some((props.active_tab)()),
-            range: Some((props.time_range)()),
+            range: Some(if (props.active_tab)() == RankType::Recent {
+                TimeRange::All
+            } else {
+                (props.time_range)()
+            }),
             tags: None,
         })
     })?;

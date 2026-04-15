@@ -41,6 +41,7 @@ pub(super) fn stat_icon_mobile_tab(tab: RankType) -> Element {
 
 fn rank_range_query(range: TimeRange) -> &'static str {
     match range {
+        TimeRange::All => "all",
         TimeRange::Daily => "daily",
         TimeRange::Weekly => "weekly",
         TimeRange::Monthly => "monthly",
@@ -149,7 +150,14 @@ pub(super) fn HomeRankPanel() -> Element {
                             to: Route::RepoListView {
                                 tags: None,
                                 metric: Some(rank_metric_query(active_tab()).to_string()),
-                                range: Some(rank_range_query(time_range()).to_string()),
+                                range: Some(
+                                    rank_range_query(if active_tab() == RankType::Recent {
+                                        TimeRange::All
+                                    } else {
+                                        time_range()
+                                    })
+                                    .to_string(),
+                                ),
                                 page: None,
                                 size: None,
                             },
@@ -255,6 +263,7 @@ pub(super) fn rank_desc(tab: RankType) -> String {
 
 pub(super) fn time_range_text(range: TimeRange) -> String {
     match range {
+        TimeRange::All => "All".to_string(),
         TimeRange::Daily => t!("view_home_rank_panel_range_daily").to_string(),
         TimeRange::Weekly => t!("view_home_rank_panel_range_weekly").to_string(),
         TimeRange::Monthly => t!("view_home_rank_panel_range_monthly").to_string(),

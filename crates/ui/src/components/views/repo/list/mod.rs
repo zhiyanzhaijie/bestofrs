@@ -165,6 +165,7 @@ pub(super) fn parse_filter_type(range: Option<&str>, metric: Option<&str>) -> Fi
         return FilterType::Total;
     }
     match range.unwrap_or_default().trim().to_lowercase().as_str() {
+        "all" | "total" => FilterType::Total,
         "daily" | "day" => FilterType::Daily,
         "monthly" | "month" => FilterType::Monthly,
         "weekly" | "week" => FilterType::Weekly,
@@ -192,10 +193,10 @@ pub(super) fn sort_metric(sort: SortType) -> RepoRankMetric {
 
 pub(super) fn filter_range(filter: FilterType) -> RepoRankTimeRange {
     match filter {
+        FilterType::Total => RepoRankTimeRange::All,
         FilterType::Daily => RepoRankTimeRange::Daily,
         FilterType::Weekly => RepoRankTimeRange::Weekly,
         FilterType::Monthly => RepoRankTimeRange::Monthly,
-        FilterType::Total => RepoRankTimeRange::Weekly,
     }
 }
 
@@ -210,10 +211,10 @@ pub(super) fn sort_metric_query(sort: SortType) -> &'static str {
 
 pub(super) fn filter_range_query(filter: FilterType) -> &'static str {
     match filter {
+        FilterType::Total => "all",
         FilterType::Daily => "daily",
         FilterType::Weekly => "weekly",
         FilterType::Monthly => "monthly",
-        FilterType::Total => "weekly",
     }
 }
 

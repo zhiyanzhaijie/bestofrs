@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use app::prelude::Pagination as PageQuery;
-use app::repo::RepoListQuery;
+use app::repo::{RepoListQuery, RepoRankTimeRange};
 
 use crate::IO::repos::list_repos_with_query;
 
@@ -10,7 +10,7 @@ pub(super) mod skeleton;
 
 use super::{
     filter_range, sort_metric, FilterType, ListSummary, RepoListCachedPage, RepoListContext,
-    RepoListHeroType,
+    RepoListHeroType, SortType,
 };
 use repo_list_content::RepoListContent;
 
@@ -30,11 +30,13 @@ pub(super) fn RepoListIO() -> Element {
         let query = RepoListQuery {
             page: page_query,
             metric: Some(sort_metric(sort_type)),
-            range: if filter_type == FilterType::Total {
-                None
-            } else {
-                Some(filter_range(filter_type))
-            },
+            range: Some(
+                if sort_type == SortType::AddTime || filter_type == FilterType::Total {
+                    RepoRankTimeRange::All
+                } else {
+                    filter_range(filter_type)
+                },
+            ),
             tags: (!active_tags.is_empty()).then_some(active_tags),
         };
         async move { list_repos_with_query(query).await }

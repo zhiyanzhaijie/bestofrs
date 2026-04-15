@@ -354,51 +354,84 @@ impl RepoRepo for SqliteRepoRepo {
                 .map_err(db_err)?;
 
         let rows: Vec<RepoDb> = if let Some(anchor_date) = anchor_date {
-            let window_days = match query.range {
-                RepoRankTimeRange::Daily => 1,
-                RepoRankTimeRange::Weekly => 7,
-                RepoRankTimeRange::Monthly => 30,
-            };
-            let range_start = anchor_date - Duration::days((window_days - 1) as i64);
             let order_expr = match query.metric {
                 RepoRankMetric::Star => "stars",
                 RepoRankMetric::Fork => "forks",
                 RepoRankMetric::Issue => "open_issues",
                 RepoRankMetric::Recent => "r.created_at",
             };
-            let sql = format!(
-                r#"
-                SELECT
-                  r.id, r.github_repo_id, r.full_name, r.description,
-                  r.homepage_url, r.avatar_url,
-                  COALESCE(SUM(d.stars_delta), 0) AS stars,
-                  COALESCE(SUM(d.forks_delta), 0) AS forks,
-                  ABS(COALESCE(SUM(d.open_issues_delta), 0)) AS open_issues,
-                  r.watchers,
-                  r.created_at,
-                  r.last_fetched_at, r.etag
-                FROM repos r
-                LEFT JOIN snapshot_deltas d
-                  ON d.repo_id = r.id
-                 AND d.snapshot_date >= ?
-                 AND d.snapshot_date <= ?
-                GROUP BY
-                  r.id, r.github_repo_id, r.full_name, r.description,
-                  r.homepage_url, r.avatar_url,
-                  r.watchers, r.created_at,
-                  r.last_fetched_at, r.etag
-                ORDER BY {order_expr} DESC, r.stars DESC
-                LIMIT ? OFFSET ?
-                "#
-            );
-            sqlx::query_as(&sql)
-                .bind(range_start)
-                .bind(anchor_date)
-                .bind(limit as i64)
-                .bind(offset as i64)
-                .fetch_all(&self.pool)
-                .await
-                .map_err(db_err)?
+            if query.range == RepoRankTimeRange::All {
+                let sql = format!(
+                    r#"
+                    SELECT
+                      r.id, r.github_repo_id, r.full_name, r.description,
+                      r.homepage_url, r.avatar_url,
+                      COALESCE(SUM(d.stars_delta), 0) AS stars,
+                      COALESCE(SUM(d.forks_delta), 0) AS forks,
+                      ABS(COALESCE(SUM(d.open_issues_delta), 0)) AS open_issues,
+                      r.watchers,
+                      r.created_at,
+                      r.last_fetched_at, r.etag
+                    FROM repos r
+                    LEFT JOIN snapshot_deltas d
+                      ON d.repo_id = r.id
+                    GROUP BY
+                      r.id, r.github_repo_id, r.full_name, r.description,
+                      r.homepage_url, r.avatar_url,
+                      r.watchers, r.created_at,
+                      r.last_fetched_at, r.etag
+                    ORDER BY {order_expr} DESC, r.stars DESC
+                    LIMIT ? OFFSET ?
+                    "#
+                );
+                sqlx::query_as(&sql)
+                    .bind(limit as i64)
+                    .bind(offset as i64)
+                    .fetch_all(&self.pool)
+                    .await
+                    .map_err(db_err)?
+            } else {
+                let window_days = match query.range {
+                    RepoRankTimeRange::Daily => 1,
+                    RepoRankTimeRange::Weekly => 7,
+                    RepoRankTimeRange::Monthly => 30,
+                    RepoRankTimeRange::All => unreachable!(),
+                };
+                let range_start = anchor_date - Duration::days((window_days - 1) as i64);
+                let sql = format!(
+                    r#"
+                    SELECT
+                      r.id, r.github_repo_id, r.full_name, r.description,
+                      r.homepage_url, r.avatar_url,
+                      COALESCE(SUM(d.stars_delta), 0) AS stars,
+                      COALESCE(SUM(d.forks_delta), 0) AS forks,
+                      ABS(COALESCE(SUM(d.open_issues_delta), 0)) AS open_issues,
+                      r.watchers,
+                      r.created_at,
+                      r.last_fetched_at, r.etag
+                    FROM repos r
+                    LEFT JOIN snapshot_deltas d
+                      ON d.repo_id = r.id
+                     AND d.snapshot_date >= ?
+                     AND d.snapshot_date <= ?
+                    GROUP BY
+                      r.id, r.github_repo_id, r.full_name, r.description,
+                      r.homepage_url, r.avatar_url,
+                      r.watchers, r.created_at,
+                      r.last_fetched_at, r.etag
+                    ORDER BY {order_expr} DESC, r.stars DESC
+                    LIMIT ? OFFSET ?
+                    "#
+                );
+                sqlx::query_as(&sql)
+                    .bind(range_start)
+                    .bind(anchor_date)
+                    .bind(limit as i64)
+                    .bind(offset as i64)
+                    .fetch_all(&self.pool)
+                    .await
+                    .map_err(db_err)?
+            }
         } else {
             let fallback_order = match query.metric {
                 RepoRankMetric::Star => "stars",

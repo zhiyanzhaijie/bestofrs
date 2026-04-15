@@ -15,8 +15,10 @@ pub enum RepoRankMetric {
     Recent,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum RepoRankTimeRange {
+    #[default]
+    All,
     Daily,
     Weekly,
     Monthly,
