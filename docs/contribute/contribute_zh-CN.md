@@ -20,7 +20,7 @@
 开始开发前，请确认以下前置条件：
 
 1. 准备好用于管理功能的 `GitHub Token`。
-2. 启动你的 `Database`（推荐 Postgres；SQLite 在初始化后未经过充分测试, 编写指南这会它还是异常的）和 `Redis`。本地开发强烈建议使用 Docker。
+2. 启动你的 `Database`（本仓库仅实现了postgres的适配）和 `Redis`。本地开发强烈建议使用 Docker。
 3. 基于示例模板在 `crates/infra/src/config/` 下创建 `development.toml`，并填入实际配置项。
 
 然后，在工作区根目录执行：

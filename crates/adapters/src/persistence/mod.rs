@@ -1,6 +1,5 @@
 mod app_error_impl;
 pub mod psql;
-pub mod sqlite;
 
 use std::sync::Arc;
 
@@ -45,8 +44,7 @@ pub async fn build_backup_by_url(
 
 pub async fn build_runtime_by_url(database_url: &str, backup_dir: &str) -> AppResult<DbRuntime> {
     let postgres = psql::PostgresBackend;
-    let sqlite = sqlite::SqliteBackend;
-    let backends: [&dyn PersistenceBackend; 2] = [&postgres, &sqlite];
+    let backends: [&dyn PersistenceBackend; 1] = [&postgres];
     for backend in backends {
         if backend.can_handle(database_url) {
             return backend.build_runtime(database_url, backup_dir).await;

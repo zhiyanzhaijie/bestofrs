@@ -32,7 +32,6 @@ tracing = "0.1"
 sqlx = { version = "0.8", default-features = false, features = [
   "runtime-tokio-rustls",
   "postgres",
-  "sqlite",
   "macros",
   "migrate",
   "chrono",

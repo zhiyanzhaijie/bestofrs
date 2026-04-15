@@ -21,7 +21,7 @@ You should install a compatible version of `dioxus-cli` for the Dioxus version i
 Before starting development, confirm the following prerequisites:
 
 1. Get your `GitHub Token` for admin features.
-2. Run your `Database` (Postgres is recommended; SQLite has not been fully tested after initial setup, it doesn't work while this Guide written) and `Redis`. For local development, using Docker is strongly recommended.
+2. Run your `Database` (Postgres is now the only one db adapter) and `Redis`. For local development, using Docker is strongly recommended.
 3. Add `development.toml` in `crates/infra/src/config/` based on the example template, then set your actual keys.
 
 Then, in the workspace root directory, run:
