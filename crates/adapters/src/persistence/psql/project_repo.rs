@@ -76,7 +76,7 @@ impl ProjectRepo for PostgresProjectRepo {
         }
 
         let mut tx = self.pool.begin().await.map_err(db_err)?;
-        let mut insert_builder: QueryBuilder<Postgres> = QueryBuilder::new(
+        let mut upsert_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"
             INSERT INTO projects (
               repo_id,
@@ -87,8 +87,7 @@ impl ProjectRepo for PostgresProjectRepo {
             )
             "#,
         );
-
-        insert_builder.push_values(items, |mut b, p| {
+        upsert_builder.push_values(items, |mut b, p| {
             b.push_bind(p.id.as_str())
                 .push_bind(&p.name)
                 .push_bind(&p.slug)
@@ -99,67 +98,25 @@ impl ProjectRepo for PostgresProjectRepo {
                 .push_bind(&p.twitter)
                 .push("NOW()");
         });
-
-        insert_builder.push(
+        upsert_builder.push(
             r#"
-            ON CONFLICT DO NOTHING
-            "#,
-        );
-
-        insert_builder
-            .build()
-            .execute(&mut *tx)
-            .await
-            .map_err(db_err)?;
-
-        let mut update_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-            r#"
-            UPDATE projects AS p
-            SET
-              name = incoming.name,
-              slug = incoming.slug,
-              description = incoming.description,
-              url = incoming.url,
-              avatar_url = incoming.avatar_url,
-              status = incoming.status,
-              twitter = incoming.twitter,
+            ON CONFLICT (repo_id) DO UPDATE SET
+              name = excluded.name,
+              slug = excluded.slug,
+              description = excluded.description,
+              url = excluded.url,
+              avatar_url = excluded.avatar_url,
+              status = excluded.status,
+              twitter = excluded.twitter,
               updated_at = NOW()
-            FROM (
             "#,
         );
-
-        update_builder.push_values(items, |mut b, p| {
-            b.push_bind(p.id.as_str())
-                .push_bind(&p.name)
-                .push_bind(&p.slug)
-                .push_bind(&p.description)
-                .push_bind(&p.url)
-                .push_bind(&p.avatar_url)
-                .push_bind(project_status_value(p.status))
-                .push_bind(&p.twitter);
-        });
-
-        update_builder.push(
-            r#"
-            ) AS incoming(repo_id, name, slug, description, url, avatar_url, status, twitter)
-            WHERE p.repo_id = incoming.repo_id
-              AND NOT EXISTS (
-                SELECT 1
-                FROM projects p2
-                WHERE p2.repo_id <> incoming.repo_id
-                  AND (p2.name = incoming.name OR p2.slug = incoming.slug)
-              )
-            "#,
-        );
-
-        update_builder
+        upsert_builder
             .build()
             .execute(&mut *tx)
             .await
             .map_err(db_err)?;
-
         tx.commit().await.map_err(db_err)?;
-
         Ok(())
     }
 
@@ -197,12 +154,6 @@ impl ProjectRepo for PostgresProjectRepo {
             r#"
             ) AS incoming(repo_id, name, slug, description, url, avatar_url, status, twitter)
             WHERE p.repo_id = incoming.repo_id
-              AND NOT EXISTS (
-                SELECT 1
-                FROM projects p2
-                WHERE p2.repo_id <> incoming.repo_id
-                  AND (p2.name = incoming.name OR p2.slug = incoming.slug)
-              )
             "#,
         );
         update_builder

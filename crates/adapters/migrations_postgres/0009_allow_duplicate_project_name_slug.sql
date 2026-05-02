@@ -1,0 +1,2 @@
+DROP INDEX IF EXISTS idx_16497_sqlite_autoindex_projects_2;
+DROP INDEX IF EXISTS idx_16497_sqlite_autoindex_projects_3;

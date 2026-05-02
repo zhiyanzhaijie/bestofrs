@@ -37,12 +37,28 @@ pub struct RepoListQuery {
     pub range: Option<RepoRankTimeRange>,
     pub tags: Option<Vec<String>>,
 }
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RepoIdentityCandidate {
+    pub input_repo_id: RepoId,
+    pub github_repo_id: i64,
+    pub canonical_full_name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RepoIdentityConflict {
+    pub input_repo_id: RepoId,
+    pub conflicting_repo_id: RepoId,
+}
 
 #[async_trait]
 pub trait RepoRepo: Send + Sync {
     async fn upsert(&self, repo: &Repo) -> AppResult<()>;
     async fn upsert_many(&self, repos: &[Repo]) -> AppResult<()>;
     async fn get(&self, id: &RepoId) -> AppResult<Option<Repo>>;
+    async fn find_identity_conflicts(
+        &self,
+        candidates: &[RepoIdentityCandidate],
+    ) -> AppResult<Vec<RepoIdentityConflict>>;
     async fn find_existing_ids(&self, ids: &[RepoId]) -> AppResult<Vec<RepoId>>;
     async fn find_existing_github_repo_ids(&self, ids: &[i64]) -> AppResult<Vec<i64>>;
     async fn list_by_ids(&self, ids: &[RepoId]) -> AppResult<Vec<Repo>>;

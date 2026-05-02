@@ -1,6 +1,9 @@
 use app::app_error::AppResult;
 use app::common::pagination::{Page, Pagination};
-use app::repo::{RepoRankMetric, RepoRankQuery, RepoRankTimeRange, RepoRepo};
+use app::repo::{
+    RepoIdentityCandidate, RepoIdentityConflict, RepoRankMetric, RepoRankQuery, RepoRankTimeRange,
+    RepoRepo,
+};
 use async_trait::async_trait;
 use chrono::Duration;
 use domain::{Repo, RepoId};
@@ -189,6 +192,55 @@ impl RepoRepo for PostgresRepoRepo {
         .map_err(db_err)?;
 
         Ok(row.map(Into::into))
+    }
+    async fn find_identity_conflicts(
+        &self,
+        candidates: &[RepoIdentityCandidate],
+    ) -> AppResult<Vec<RepoIdentityConflict>> {
+        if candidates.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
+            r#"
+            WITH input(input_repo_id, github_repo_id, canonical_full_name) AS (
+            "#,
+        );
+        qb.push_values(candidates, |mut b, c| {
+            b.push_bind(c.input_repo_id.as_str())
+                .push_bind(c.github_repo_id)
+                .push_bind(c.canonical_full_name.as_str());
+        });
+        qb.push(
+            r#"
+            )
+            SELECT DISTINCT ON (i.input_repo_id)
+              i.input_repo_id,
+              r.id AS conflicting_repo_id
+            FROM input i
+            JOIN repos r
+              ON r.id <> i.input_repo_id
+             AND (
+               r.github_repo_id = i.github_repo_id
+               OR lower(r.full_name) = lower(i.canonical_full_name)
+             )
+            ORDER BY i.input_repo_id, r.id
+            "#,
+        );
+        let rows: Vec<(String, String)> = qb
+            .build_query_as()
+            .fetch_all(&self.pool)
+            .await
+            .map_err(db_err)?;
+        Ok(rows
+            .into_iter()
+            .map(
+                |(input_repo_id, conflicting_repo_id)| RepoIdentityConflict {
+                    input_repo_id: RepoId::new_unchecked(input_repo_id),
+                    conflicting_repo_id: RepoId::new_unchecked(conflicting_repo_id),
+                },
+            )
+            .collect())
     }
     async fn find_existing_ids(&self, ids: &[RepoId]) -> AppResult<Vec<RepoId>> {
         if ids.is_empty() {

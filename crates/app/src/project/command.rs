@@ -7,7 +7,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::app_error::AppResult;
 use crate::project::{ProjectEventHandler, ProjectRepo};
-use crate::repo::{GithubGateway, RepoGithubLookupKey, RepoRepo, RepoTagRepo};
+use crate::repo::{
+    GithubGateway, RepoGithubLookupKey, RepoIdentityCandidate, RepoIdentityConflict, RepoRepo,
+    RepoTagRepo,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ImportProjectCommand {
@@ -168,11 +171,11 @@ impl ProjectCommandHandler {
                 .await;
             let mut upsert_projects = Vec::new();
             let mut repos = Vec::new();
+            let mut fetched_ok = Vec::new();
             for item in fetched {
                 match item {
                     Ok((project, repo)) => {
-                        upsert_projects.push(project);
-                        repos.push(repo);
+                        fetched_ok.push((project, repo));
                     }
                     Err(err) => {
                         report.failed_upsert += 1;
@@ -181,6 +184,51 @@ impl ProjectCommandHandler {
                         }
                     }
                 }
+            }
+            let candidates = fetched_ok
+                .iter()
+                .filter_map(|(project, repo)| {
+                    let github_repo_id = repo.github_repo_id?;
+                    let canonical_full_name = repo
+                        .full_name
+                        .clone()
+                        .unwrap_or_else(|| project.id.as_str().to_string());
+                    Some(RepoIdentityCandidate {
+                        input_repo_id: project.id.clone(),
+                        github_repo_id,
+                        canonical_full_name,
+                    })
+                })
+                .collect::<Vec<_>>();
+            let conflicts = self.repos.find_identity_conflicts(&candidates).await?;
+            let conflicts_by_input = conflicts
+                .into_iter()
+                .map(
+                    |RepoIdentityConflict {
+                         input_repo_id,
+                         conflicting_repo_id,
+                     }| {
+                        (
+                            input_repo_id.as_str().to_string(),
+                            conflicting_repo_id.as_str().to_string(),
+                        )
+                    },
+                )
+                .collect::<HashMap<_, _>>();
+            for (project, repo) in fetched_ok {
+                if let Some(conflict_repo_id) = conflicts_by_input.get(project.id.as_str()) {
+                    report.failed_upsert += 1;
+                    if report.error_examples.len() < MAX_ERROR_EXAMPLES {
+                        report.error_examples.push(format!(
+                            "invalid repo_id `{}`: repository identity already tracked by `{}`",
+                            project.id.as_str(),
+                            conflict_repo_id
+                        ));
+                    }
+                    continue;
+                }
+                upsert_projects.push(project);
+                repos.push(repo);
             }
             if !upsert_projects.is_empty() {
                 self.projects.upsert_many(&upsert_projects).await?;

@@ -12,7 +12,7 @@ use crate::components::ui::select::{
     SelectTrigger, SelectValue,
 };
 use crate::components::ui::textarea::Textarea;
-use crate::types::projects::{ProjectDto, ProjectImportItem};
+use crate::types::projects::{ImportProjectsResult, ProjectDto, ProjectImportItem};
 use crate::types::tags::TagDto;
 use crate::IO::projects::{import_projects, import_projects_json, update_projects};
 use crate::IO::repos::list_tags_with_meta;
@@ -46,6 +46,27 @@ impl Default for ProjectFormData {
             selected_tag_values: Vec::new(),
         }
     }
+}
+
+fn format_import_result_message(prefix: &str, res: &ImportProjectsResult) -> String {
+    let mut lines = vec![format!(
+        "{prefix}：total={} upserted={} skipped_invalid={} failed_upsert={}",
+        res.total, res.upserted, res.skipped_invalid, res.failed_upsert,
+    )];
+    if !res.invalid_examples.is_empty() {
+        lines.push("invalid examples:".to_string());
+        lines.extend(
+            res.invalid_examples
+                .iter()
+                .take(10)
+                .map(|v| format!("- {v}")),
+        );
+    }
+    if !res.error_examples.is_empty() {
+        lines.push("errors:".to_string());
+        lines.extend(res.error_examples.iter().take(10).map(|v| format!("- {v}")));
+    }
+    lines.join("\n")
 }
 impl From<&ProjectDto> for ProjectFormData {
     fn from(project: &ProjectDto) -> Self {
@@ -408,13 +429,7 @@ pub(super) fn ProjectTab(props: ProjectTabProps) -> Element {
                                             Ok(res) => {
                                                 ui.with_mut(|u| {
                                                     u.json_import_message = Some(
-                                                        format!(
-                                                            "导入完成：total={} upserted={} skipped_invalid={} failed_upsert={}",
-                                                            res.total,
-                                                            res.upserted,
-                                                            res.skipped_invalid,
-                                                            res.failed_upsert,
-                                                        ),
+                                                        format_import_result_message("导入完成", &res),
                                                     );
                                                 });
                                                 refresh.with_mut(|v| *v += 1);
@@ -471,9 +486,8 @@ pub(super) fn ProjectTab(props: ProjectTabProps) -> Element {
                                 match result {
                                     Ok(res) => {
                                         ui.with_mut(|u| {
-                                            u.panel_message = Some(format!(
-                                                "完成：total={} upserted={} skipped_invalid={} failed_upsert={}",
-                                                res.total, res.upserted, res.skipped_invalid, res.failed_upsert,
+                                            u.panel_message = Some(format_import_result_message(
+                                                "完成", &res,
                                             ));
                                         });
                                         refresh.with_mut(|v| *v += 1);
