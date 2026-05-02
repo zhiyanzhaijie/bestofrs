@@ -2,7 +2,7 @@ FROM rust:1.90.0-bookworm AS chef
 
 RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
 RUN cargo binstall cargo-chef --no-confirm
-RUN cargo binstall dioxus-cli -y --force --version 0.7.4
+RUN cargo install dioxus-cli --version 0.7.7 --locked
 WORKDIR /app
 
 FROM chef AS planner

@@ -5,7 +5,7 @@ edition.workspace = true
 authors.workspace = true
 
 [dependencies]
-dioxus = { version = "0.7.4", features = ["router", "fullstack"] }
+dioxus = { version = "0.7.7", features = ["router", "fullstack"] }
 dioxus-i18n = { git = "https://github.com/dioxus-community/dioxus-i18n", tag = "v0.5.1" }
 dioxus-use-js = "0.4.7"
 dioxus-sdk-time = "0.7"
